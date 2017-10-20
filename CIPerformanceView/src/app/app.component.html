@@ -10,6 +10,7 @@
     <th>Finished</th>
     <th>State</th>
     <th>Message</th>
+    <th>Misc</th>
   </thead>
   <tbody>
     <tr *ngFor="let build of builds">
@@ -24,6 +25,13 @@
       </td>
       <td>
           {{build.commit.message}}
+      </td>
+      <td>
+        <ul>
+          <li *ngFor="let job of build.jobs">
+            Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Time: {{job.parsed.time}}.
+          </li>
+        </ul>
       </td>
     </tr>
   </tbody>

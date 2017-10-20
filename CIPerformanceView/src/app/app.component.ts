@@ -34,6 +34,8 @@ interface IBuild {
   state: string;
 
   commit: ICommit;
+  logs: any[];
+  jobs: IJob[];
 }
 
 interface ICommit {
@@ -49,6 +51,36 @@ interface ICommit {
   pull_request_number?: number;
   sha: string;
   tag?: string;
+}
+
+interface IJob {
+  id: number;
+  repository_id: number;
+  repository_slug: string;
+  stage_id?: number;
+  build_id: number;
+  commit_id: number;
+  number: string;
+  config: {
+    language: string;
+    sudo: boolean,
+    before_install: string[];
+    script: string[];
+    result: string;
+    group: string;
+    dist: string;
+    os: string
+  };
+  state: string;
+  started_at: string;
+  finished_at: string;
+  queue: string;
+  allow_failure: boolean;
+  tags?: string;
+  annotation_ids: number[];
+
+  log: string;
+  parsed;
 }
 
 @Component({
@@ -67,10 +99,9 @@ export class AppComponent {
 
   private auth() {
     const headers = this.getHeaders();
-    const params = new HttpParams();
 
     return this.httpClient.get('https://api.travis-ci.org/users', {
-      headers: headers, params: params
+      headers: headers
     })
       .toPromise()
       .then((res: { user: IUser }) => {
@@ -84,8 +115,8 @@ export class AppComponent {
     const headers = this.getHeaders();
     const params = new HttpParams();
 
-    return this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
-      headers: headers, params: params
+    this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
+      headers: headers
     })
       .toPromise()
       .then((res: { builds: IBuild[], commits: ICommit[] }) => {
@@ -94,14 +125,56 @@ export class AppComponent {
           build.commit = res.commits.find(c => c.id === build.commit_id);
         });
 
+        this.builds.forEach(build => {
+          build.jobs = [];
+
+          build.job_ids.forEach((jobId) => {
+            return this.httpClient.get('https://api.travis-ci.org/jobs/' + jobId, {
+              headers: headers
+            })
+            .toPromise()
+            .then((r: { job: IJob, commit: ICommit }) => {
+              build.jobs.push(r.job);
+
+              return this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
+              .toPromise()
+              .then((log: string) => {
+                  r.job.log = log;
+                  r.job.parsed = this.parseLog(log);
+              });
+            });
+          });
+        });
+
         return res.builds;
       });
+  }
+
+  private parseLog(log: string) {
+    const lines = log.split(/[\r\n]/);
+
+    const r = /Execution Runtime: /;
+    const r2 = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
+    const testCheck = /\*\*\*\*\*/;
+
+    const startTestLineIdx = lines.findIndex(l => r.test(l));
+    const endTestLineIdx = lines.findIndex(l => r2.test(l));
+
+    const tests = lines.slice(startTestLineIdx, endTestLineIdx).filter(l => testCheck.test(l)).map(l => l.match(/\.(.+?)$/)[1]);
+    const [_, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(r2);
+
+    return {
+      testsNum: testsNum,
+      errors: errors,
+      failures: failures,
+      inconclusive: inconclusive,
+      time: time
+    };
   }
 
   private getHeaders() {
     const headers = new HttpHeaders({
       'Accept': 'application/vnd.travis-ci.2+json',
-      'User-Agent': 'MyClient/1.0.0',
       'Authorization': 'token "uJeDK6yjk6Gt9HtfRNec-w"'
     });
 
