@@ -38,7 +38,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<h3>Builds</h3>\n<table *ngIf=\"builds\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n    </tr>\n  </tbody>\n</table>"
+module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<h3>Builds</h3>\n<table *ngIf=\"builds\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <ul>\n          <li *ngFor=\"let job of build.jobs\">\n            Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Time: {{job.parsed.time}}.\n          </li>\n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
 
 /***/ }),
 
@@ -72,9 +72,8 @@ var AppComponent = (function () {
     AppComponent.prototype.auth = function () {
         var _this = this;
         var headers = this.getHeaders();
-        var params = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["d" /* HttpParams */]();
         return this.httpClient.get('https://api.travis-ci.org/users', {
-            headers: headers, params: params
+            headers: headers
         })
             .toPromise()
             .then(function (res) {
@@ -86,8 +85,8 @@ var AppComponent = (function () {
         var _this = this;
         var headers = this.getHeaders();
         var params = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["d" /* HttpParams */]();
-        return this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
-            headers: headers, params: params
+        this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
+            headers: headers
         })
             .toPromise()
             .then(function (res) {
@@ -95,13 +94,47 @@ var AppComponent = (function () {
             _this.builds.forEach(function (build) {
                 build.commit = res.commits.find(function (c) { return c.id === build.commit_id; });
             });
+            _this.builds.forEach(function (build) {
+                build.jobs = [];
+                build.job_ids.forEach(function (jobId) {
+                    return _this.httpClient.get('https://api.travis-ci.org/jobs/' + jobId, {
+                        headers: headers
+                    })
+                        .toPromise()
+                        .then(function (r) {
+                        build.jobs.push(r.job);
+                        return _this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
+                            .toPromise()
+                            .then(function (log) {
+                            r.job.log = log;
+                            r.job.parsed = _this.parseLog(log);
+                        });
+                    });
+                });
+            });
             return res.builds;
         });
+    };
+    AppComponent.prototype.parseLog = function (log) {
+        var lines = log.split(/[\r\n]/);
+        var r = /Execution Runtime: /;
+        var r2 = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
+        var testCheck = /\*\*\*\*\*/;
+        var startTestLineIdx = lines.findIndex(function (l) { return r.test(l); });
+        var endTestLineIdx = lines.findIndex(function (l) { return r2.test(l); });
+        var tests = lines.slice(startTestLineIdx, endTestLineIdx).filter(function (l) { return testCheck.test(l); }).map(function (l) { return l.match(/\.(.+?)$/)[1]; });
+        var _a = lines[endTestLineIdx].match(r2), _ = _a[0], testsNum = _a[1], errors = _a[2], failures = _a[3], inconclusive = _a[4], time = _a[5];
+        return {
+            testsNum: testsNum,
+            errors: errors,
+            failures: failures,
+            inconclusive: inconclusive,
+            time: time
+        };
     };
     AppComponent.prototype.getHeaders = function () {
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["c" /* HttpHeaders */]({
             'Accept': 'application/vnd.travis-ci.2+json',
-            'User-Agent': 'MyClient/1.0.0',
             'Authorization': 'token "uJeDK6yjk6Gt9HtfRNec-w"'
         });
         return headers;
