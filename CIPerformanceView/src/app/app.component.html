@@ -4,7 +4,7 @@
 <!-- <a href="https://api.travis-ci.com/auth/handshake">log in</a> -->
 
 <h3>Builds</h3>
-<table *ngIf="builds">
+<table *ngIf="builds && builds.length > 0">
   <thead>
     <th>Number</th>
     <th>Finished</th>
@@ -27,10 +27,32 @@
           {{build.commit.message}}
       </td>
       <td>
-        <ul>
-          <li *ngFor="let job of build.jobs">
-            Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Time: {{job.parsed.time}}.
-          </li>
+        <ul *ngIf="build.jobs">
+          <ng-container *ngFor="let job of build.jobs">
+              <li *ngIf="job.parsed">
+                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.
+                  <table *ngIf="job.parsed.tests && job.parsed.tests.length > 0">
+                    <thead>
+                      <th>Name</th>
+                      <th>Duration (ms)</th>
+                      <th>GC0</th>
+                      <th>GC1</th>
+                      <th>GC2</th>
+                      <th>Allocated (KB)</th>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let t of job.parsed.tests">
+                        <td>{{t.shortName}}</td>
+                        <td>{{t.duration}}</td>
+                        <td>{{t.collect0}}</td>
+                        <td>{{t.collect1}}</td>
+                        <td>{{t.collect2}}</td>
+                        <td>{{t.allocated}}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </li>
+          </ng-container>          
         </ul>
       </td>
     </tr>

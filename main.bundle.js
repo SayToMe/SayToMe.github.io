@@ -38,7 +38,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<h3>Builds</h3>\n<table *ngIf=\"builds\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <ul>\n          <li *ngFor=\"let job of build.jobs\">\n            Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Time: {{job.parsed.time}}.\n          </li>\n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
+module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<h3>Builds</h3>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <ul *ngIf=\"build.jobs\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.parsed\">\n                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.\n                  <table *ngIf=\"job.parsed.tests && job.parsed.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.parsed.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.collect0}}</td>\n                        <td>{{t.collect1}}</td>\n                        <td>{{t.collect2}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
 
 /***/ }),
 
@@ -120,16 +120,28 @@ var AppComponent = (function () {
         var r = /Execution Runtime: /;
         var r2 = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
         var testCheck = /\*\*\*\*\*/;
+        var r3 = /\*\*\*\*\* Test (.+)\. Took (\d*\.?\d*) ms. GC collects: (-?\d+) (-?\d+) (-?\d+) Allocated: (\d*\.?\d*) KB\./;
         var startTestLineIdx = lines.findIndex(function (l) { return r.test(l); });
         var endTestLineIdx = lines.findIndex(function (l) { return r2.test(l); });
-        var tests = lines.slice(startTestLineIdx, endTestLineIdx).filter(function (l) { return testCheck.test(l); }).map(function (l) { return l.match(/\.(.+?)$/)[1]; });
+        var tests = lines.slice(startTestLineIdx, endTestLineIdx).filter(function (l) { return r3.test(l); }).map(function (l) { return l.match(r3); }).map(function (rs) {
+            return {
+                shortName: rs[1].slice(rs[1].lastIndexOf('.') + 1),
+                fullName: rs[1],
+                duration: rs[2],
+                collect0: rs[3],
+                collect1: rs[4],
+                collect2: rs[5],
+                allocated: rs[6]
+            };
+        });
         var _a = lines[endTestLineIdx].match(r2), _ = _a[0], testsNum = _a[1], errors = _a[2], failures = _a[3], inconclusive = _a[4], time = _a[5];
         return {
             testsNum: testsNum,
             errors: errors,
             failures: failures,
             inconclusive: inconclusive,
-            time: time
+            time: time,
+            tests: tests
         };
     };
     AppComponent.prototype.getHeaders = function () {

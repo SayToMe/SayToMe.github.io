@@ -156,11 +156,23 @@ export class AppComponent {
     const r = /Execution Runtime: /;
     const r2 = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
     const testCheck = /\*\*\*\*\*/;
+    const r3 = /\*\*\*\*\* Test (.+)\. Took (\d*\.?\d*) ms. GC collects: (-?\d+) (-?\d+) (-?\d+) Allocated: (\d*\.?\d*) KB\./;
 
     const startTestLineIdx = lines.findIndex(l => r.test(l));
     const endTestLineIdx = lines.findIndex(l => r2.test(l));
 
-    const tests = lines.slice(startTestLineIdx, endTestLineIdx).filter(l => testCheck.test(l)).map(l => l.match(/\.(.+?)$/)[1]);
+    const tests = lines.slice(startTestLineIdx, endTestLineIdx).filter(l => r3.test(l)).map(l => l.match(r3)).map(rs => {
+      return {
+        shortName: rs[1].slice(rs[1].lastIndexOf('.') + 1),
+        fullName: rs[1],
+        duration: rs[2],
+        collect0: rs[3],
+        collect1: rs[4],
+        collect2: rs[5],
+        allocated: rs[6]
+      };
+    });
+
     const [_, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(r2);
 
     return {
@@ -168,7 +180,8 @@ export class AppComponent {
       errors: errors,
       failures: failures,
       inconclusive: inconclusive,
-      time: time
+      time: time,
+      tests: tests
     };
   }
 
