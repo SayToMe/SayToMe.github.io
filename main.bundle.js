@@ -38,7 +38,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<h3>Builds</h3>\n<span *ngIf=\"!builds || builds.length === 0\">\n  Loading builds\n</span>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <span *ngIf=\"!build.jobs || build.jobs.length === 0\">\n          Loading jobs and logs\n        </span>\n        <ul *ngIf=\"build.jobs && build.jobs.length > 0\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.parsed\">\n                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.\n                  <table *ngIf=\"job.parsed.tests && job.parsed.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.parsed.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.collect0}}</td>\n                        <td>{{t.collect1}}</td>\n                        <td>{{t.collect2}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
+module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<div class=\"charts\" style=\"margin-left: 50px; margin-right: 50px; height: 500px;\">\n  <canvas id=\"performanceChart\" class=\"performance-chart\"></canvas>\n</div>\n\n<h3>Builds</h3>\n<span *ngIf=\"!builds || builds.length === 0\">\n  Loading builds\n</span>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <span *ngIf=\"!build.jobs || build.jobs.length === 0\">\n          Loading jobs and logs\n        </span>\n        <ul *ngIf=\"build.jobs && build.jobs.length > 0\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.parsed\">\n                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.\n                  <table *ngIf=\"job.parsed.tests && job.parsed.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.parsed.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.collect0}}</td>\n                        <td>{{t.collect1}}</td>\n                        <td>{{t.collect2}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
 
 /***/ }),
 
@@ -51,6 +51,8 @@ module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.nam
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_common_http__ = __webpack_require__("../../../common/@angular/common/http.es5.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_operators_map__ = __webpack_require__("../../../../rxjs/operators/map.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_operators_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_operators_map__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_chart_js__ = __webpack_require__("../../../../chart.js/src/chart.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_chart_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_chart_js__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -63,11 +65,38 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
 var AppComponent = (function () {
     function AppComponent(httpClient) {
+        var _this = this;
         this.httpClient = httpClient;
+        this.randomColorGenerator = function (opacity) {
+            if (opacity === void 0) { opacity = 0.5; }
+            var hex = '#' + (Math.random().toString(16) + '0000000').slice(2, 8);
+            return _this.hexToRgbA(hex, opacity);
+        };
+        this.hexToRgbA = function (hex, opacity) {
+            var c;
+            if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+                c = hex.substring(1).split('');
+                if (c.length === 3) {
+                    c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+                }
+                c = '0x' + c.join('');
+                // tslint:disable-next-line:no-bitwise
+                var r = (c >> 16) & 255;
+                // tslint:disable-next-line:no-bitwise
+                var g = (c >> 8) & 255;
+                // tslint:disable-next-line:no-bitwise
+                var b = c & 255;
+                return 'rgba(' + [r, g, b].join(',') + ',' + opacity + ')';
+            }
+            throw new Error('Bad Hex');
+        };
         this.auth();
-        this.getBuilds();
+        this.getBuilds().then(function () {
+            _this.prepareChart();
+        });
     }
     AppComponent.prototype.auth = function () {
         var _this = this;
@@ -85,7 +114,7 @@ var AppComponent = (function () {
         var _this = this;
         var headers = this.getHeaders();
         var params = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["d" /* HttpParams */]();
-        this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
+        return this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
             headers: headers
         })
             .toPromise()
@@ -94,9 +123,9 @@ var AppComponent = (function () {
             _this.builds.forEach(function (build) {
                 build.commit = res.commits.find(function (c) { return c.id === build.commit_id; });
             });
-            _this.builds.forEach(function (build) {
+            return Promise.all(_this.builds.map(function (build) {
                 build.jobs = [];
-                build.job_ids.forEach(function (jobId) {
+                return Promise.all(build.job_ids.map(function (jobId) {
                     return _this.httpClient.get('https://api.travis-ci.org/jobs/' + jobId, {
                         headers: headers
                     })
@@ -110,9 +139,8 @@ var AppComponent = (function () {
                             r.job.parsed = _this.parseLog(log);
                         });
                     });
-                });
-            });
-            return res.builds;
+                }));
+            }));
         });
     };
     AppComponent.prototype.parseLog = function (log) {
@@ -143,6 +171,36 @@ var AppComponent = (function () {
             time: time,
             tests: tests
         };
+    };
+    AppComponent.prototype.prepareChart = function () {
+        var _this = this;
+        var dt = this.builds.map(function (b) { return b.jobs.map(function (j) {
+            return {
+                message: b.commit.message,
+                time: j.parsed.time
+            };
+        }); }).map(function (jobs) { return jobs[0]; });
+        var labels = dt.map(function (j) { return j.message; });
+        var data = dt.map(function (j) { return j.time; });
+        var colors = dt.map(function (j) { return _this.randomColorGenerator(); });
+        var ctx = document.getElementById('performanceChart').getContext('2d');
+        var chart = new __WEBPACK_IMPORTED_MODULE_3_chart_js___default.a(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                        label: 'Tests execution time',
+                        data: data,
+                        backgroundColor: colors,
+                        borderColor: colors,
+                        borderWidth: 1
+                    }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
     };
     AppComponent.prototype.getHeaders = function () {
         var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["c" /* HttpHeaders */]({
@@ -245,6 +303,259 @@ if (__WEBPACK_IMPORTED_MODULE_3__environments_environment__["a" /* environment *
 Object(__WEBPACK_IMPORTED_MODULE_1__angular_platform_browser_dynamic__["a" /* platformBrowserDynamic */])().bootstrapModule(__WEBPACK_IMPORTED_MODULE_2__app_app_module__["a" /* AppModule */])
     .catch(function (err) { return console.log(err); });
 //# sourceMappingURL=main.js.map
+
+/***/ }),
+
+/***/ "../../../../moment/locale recursive ^\\.\\/.*$":
+/***/ (function(module, exports, __webpack_require__) {
+
+var map = {
+	"./af": "../../../../moment/locale/af.js",
+	"./af.js": "../../../../moment/locale/af.js",
+	"./ar": "../../../../moment/locale/ar.js",
+	"./ar-dz": "../../../../moment/locale/ar-dz.js",
+	"./ar-dz.js": "../../../../moment/locale/ar-dz.js",
+	"./ar-kw": "../../../../moment/locale/ar-kw.js",
+	"./ar-kw.js": "../../../../moment/locale/ar-kw.js",
+	"./ar-ly": "../../../../moment/locale/ar-ly.js",
+	"./ar-ly.js": "../../../../moment/locale/ar-ly.js",
+	"./ar-ma": "../../../../moment/locale/ar-ma.js",
+	"./ar-ma.js": "../../../../moment/locale/ar-ma.js",
+	"./ar-sa": "../../../../moment/locale/ar-sa.js",
+	"./ar-sa.js": "../../../../moment/locale/ar-sa.js",
+	"./ar-tn": "../../../../moment/locale/ar-tn.js",
+	"./ar-tn.js": "../../../../moment/locale/ar-tn.js",
+	"./ar.js": "../../../../moment/locale/ar.js",
+	"./az": "../../../../moment/locale/az.js",
+	"./az.js": "../../../../moment/locale/az.js",
+	"./be": "../../../../moment/locale/be.js",
+	"./be.js": "../../../../moment/locale/be.js",
+	"./bg": "../../../../moment/locale/bg.js",
+	"./bg.js": "../../../../moment/locale/bg.js",
+	"./bn": "../../../../moment/locale/bn.js",
+	"./bn.js": "../../../../moment/locale/bn.js",
+	"./bo": "../../../../moment/locale/bo.js",
+	"./bo.js": "../../../../moment/locale/bo.js",
+	"./br": "../../../../moment/locale/br.js",
+	"./br.js": "../../../../moment/locale/br.js",
+	"./bs": "../../../../moment/locale/bs.js",
+	"./bs.js": "../../../../moment/locale/bs.js",
+	"./ca": "../../../../moment/locale/ca.js",
+	"./ca.js": "../../../../moment/locale/ca.js",
+	"./cs": "../../../../moment/locale/cs.js",
+	"./cs.js": "../../../../moment/locale/cs.js",
+	"./cv": "../../../../moment/locale/cv.js",
+	"./cv.js": "../../../../moment/locale/cv.js",
+	"./cy": "../../../../moment/locale/cy.js",
+	"./cy.js": "../../../../moment/locale/cy.js",
+	"./da": "../../../../moment/locale/da.js",
+	"./da.js": "../../../../moment/locale/da.js",
+	"./de": "../../../../moment/locale/de.js",
+	"./de-at": "../../../../moment/locale/de-at.js",
+	"./de-at.js": "../../../../moment/locale/de-at.js",
+	"./de-ch": "../../../../moment/locale/de-ch.js",
+	"./de-ch.js": "../../../../moment/locale/de-ch.js",
+	"./de.js": "../../../../moment/locale/de.js",
+	"./dv": "../../../../moment/locale/dv.js",
+	"./dv.js": "../../../../moment/locale/dv.js",
+	"./el": "../../../../moment/locale/el.js",
+	"./el.js": "../../../../moment/locale/el.js",
+	"./en-au": "../../../../moment/locale/en-au.js",
+	"./en-au.js": "../../../../moment/locale/en-au.js",
+	"./en-ca": "../../../../moment/locale/en-ca.js",
+	"./en-ca.js": "../../../../moment/locale/en-ca.js",
+	"./en-gb": "../../../../moment/locale/en-gb.js",
+	"./en-gb.js": "../../../../moment/locale/en-gb.js",
+	"./en-ie": "../../../../moment/locale/en-ie.js",
+	"./en-ie.js": "../../../../moment/locale/en-ie.js",
+	"./en-nz": "../../../../moment/locale/en-nz.js",
+	"./en-nz.js": "../../../../moment/locale/en-nz.js",
+	"./eo": "../../../../moment/locale/eo.js",
+	"./eo.js": "../../../../moment/locale/eo.js",
+	"./es": "../../../../moment/locale/es.js",
+	"./es-do": "../../../../moment/locale/es-do.js",
+	"./es-do.js": "../../../../moment/locale/es-do.js",
+	"./es.js": "../../../../moment/locale/es.js",
+	"./et": "../../../../moment/locale/et.js",
+	"./et.js": "../../../../moment/locale/et.js",
+	"./eu": "../../../../moment/locale/eu.js",
+	"./eu.js": "../../../../moment/locale/eu.js",
+	"./fa": "../../../../moment/locale/fa.js",
+	"./fa.js": "../../../../moment/locale/fa.js",
+	"./fi": "../../../../moment/locale/fi.js",
+	"./fi.js": "../../../../moment/locale/fi.js",
+	"./fo": "../../../../moment/locale/fo.js",
+	"./fo.js": "../../../../moment/locale/fo.js",
+	"./fr": "../../../../moment/locale/fr.js",
+	"./fr-ca": "../../../../moment/locale/fr-ca.js",
+	"./fr-ca.js": "../../../../moment/locale/fr-ca.js",
+	"./fr-ch": "../../../../moment/locale/fr-ch.js",
+	"./fr-ch.js": "../../../../moment/locale/fr-ch.js",
+	"./fr.js": "../../../../moment/locale/fr.js",
+	"./fy": "../../../../moment/locale/fy.js",
+	"./fy.js": "../../../../moment/locale/fy.js",
+	"./gd": "../../../../moment/locale/gd.js",
+	"./gd.js": "../../../../moment/locale/gd.js",
+	"./gl": "../../../../moment/locale/gl.js",
+	"./gl.js": "../../../../moment/locale/gl.js",
+	"./gom-latn": "../../../../moment/locale/gom-latn.js",
+	"./gom-latn.js": "../../../../moment/locale/gom-latn.js",
+	"./he": "../../../../moment/locale/he.js",
+	"./he.js": "../../../../moment/locale/he.js",
+	"./hi": "../../../../moment/locale/hi.js",
+	"./hi.js": "../../../../moment/locale/hi.js",
+	"./hr": "../../../../moment/locale/hr.js",
+	"./hr.js": "../../../../moment/locale/hr.js",
+	"./hu": "../../../../moment/locale/hu.js",
+	"./hu.js": "../../../../moment/locale/hu.js",
+	"./hy-am": "../../../../moment/locale/hy-am.js",
+	"./hy-am.js": "../../../../moment/locale/hy-am.js",
+	"./id": "../../../../moment/locale/id.js",
+	"./id.js": "../../../../moment/locale/id.js",
+	"./is": "../../../../moment/locale/is.js",
+	"./is.js": "../../../../moment/locale/is.js",
+	"./it": "../../../../moment/locale/it.js",
+	"./it.js": "../../../../moment/locale/it.js",
+	"./ja": "../../../../moment/locale/ja.js",
+	"./ja.js": "../../../../moment/locale/ja.js",
+	"./jv": "../../../../moment/locale/jv.js",
+	"./jv.js": "../../../../moment/locale/jv.js",
+	"./ka": "../../../../moment/locale/ka.js",
+	"./ka.js": "../../../../moment/locale/ka.js",
+	"./kk": "../../../../moment/locale/kk.js",
+	"./kk.js": "../../../../moment/locale/kk.js",
+	"./km": "../../../../moment/locale/km.js",
+	"./km.js": "../../../../moment/locale/km.js",
+	"./kn": "../../../../moment/locale/kn.js",
+	"./kn.js": "../../../../moment/locale/kn.js",
+	"./ko": "../../../../moment/locale/ko.js",
+	"./ko.js": "../../../../moment/locale/ko.js",
+	"./ky": "../../../../moment/locale/ky.js",
+	"./ky.js": "../../../../moment/locale/ky.js",
+	"./lb": "../../../../moment/locale/lb.js",
+	"./lb.js": "../../../../moment/locale/lb.js",
+	"./lo": "../../../../moment/locale/lo.js",
+	"./lo.js": "../../../../moment/locale/lo.js",
+	"./lt": "../../../../moment/locale/lt.js",
+	"./lt.js": "../../../../moment/locale/lt.js",
+	"./lv": "../../../../moment/locale/lv.js",
+	"./lv.js": "../../../../moment/locale/lv.js",
+	"./me": "../../../../moment/locale/me.js",
+	"./me.js": "../../../../moment/locale/me.js",
+	"./mi": "../../../../moment/locale/mi.js",
+	"./mi.js": "../../../../moment/locale/mi.js",
+	"./mk": "../../../../moment/locale/mk.js",
+	"./mk.js": "../../../../moment/locale/mk.js",
+	"./ml": "../../../../moment/locale/ml.js",
+	"./ml.js": "../../../../moment/locale/ml.js",
+	"./mr": "../../../../moment/locale/mr.js",
+	"./mr.js": "../../../../moment/locale/mr.js",
+	"./ms": "../../../../moment/locale/ms.js",
+	"./ms-my": "../../../../moment/locale/ms-my.js",
+	"./ms-my.js": "../../../../moment/locale/ms-my.js",
+	"./ms.js": "../../../../moment/locale/ms.js",
+	"./my": "../../../../moment/locale/my.js",
+	"./my.js": "../../../../moment/locale/my.js",
+	"./nb": "../../../../moment/locale/nb.js",
+	"./nb.js": "../../../../moment/locale/nb.js",
+	"./ne": "../../../../moment/locale/ne.js",
+	"./ne.js": "../../../../moment/locale/ne.js",
+	"./nl": "../../../../moment/locale/nl.js",
+	"./nl-be": "../../../../moment/locale/nl-be.js",
+	"./nl-be.js": "../../../../moment/locale/nl-be.js",
+	"./nl.js": "../../../../moment/locale/nl.js",
+	"./nn": "../../../../moment/locale/nn.js",
+	"./nn.js": "../../../../moment/locale/nn.js",
+	"./pa-in": "../../../../moment/locale/pa-in.js",
+	"./pa-in.js": "../../../../moment/locale/pa-in.js",
+	"./pl": "../../../../moment/locale/pl.js",
+	"./pl.js": "../../../../moment/locale/pl.js",
+	"./pt": "../../../../moment/locale/pt.js",
+	"./pt-br": "../../../../moment/locale/pt-br.js",
+	"./pt-br.js": "../../../../moment/locale/pt-br.js",
+	"./pt.js": "../../../../moment/locale/pt.js",
+	"./ro": "../../../../moment/locale/ro.js",
+	"./ro.js": "../../../../moment/locale/ro.js",
+	"./ru": "../../../../moment/locale/ru.js",
+	"./ru.js": "../../../../moment/locale/ru.js",
+	"./sd": "../../../../moment/locale/sd.js",
+	"./sd.js": "../../../../moment/locale/sd.js",
+	"./se": "../../../../moment/locale/se.js",
+	"./se.js": "../../../../moment/locale/se.js",
+	"./si": "../../../../moment/locale/si.js",
+	"./si.js": "../../../../moment/locale/si.js",
+	"./sk": "../../../../moment/locale/sk.js",
+	"./sk.js": "../../../../moment/locale/sk.js",
+	"./sl": "../../../../moment/locale/sl.js",
+	"./sl.js": "../../../../moment/locale/sl.js",
+	"./sq": "../../../../moment/locale/sq.js",
+	"./sq.js": "../../../../moment/locale/sq.js",
+	"./sr": "../../../../moment/locale/sr.js",
+	"./sr-cyrl": "../../../../moment/locale/sr-cyrl.js",
+	"./sr-cyrl.js": "../../../../moment/locale/sr-cyrl.js",
+	"./sr.js": "../../../../moment/locale/sr.js",
+	"./ss": "../../../../moment/locale/ss.js",
+	"./ss.js": "../../../../moment/locale/ss.js",
+	"./sv": "../../../../moment/locale/sv.js",
+	"./sv.js": "../../../../moment/locale/sv.js",
+	"./sw": "../../../../moment/locale/sw.js",
+	"./sw.js": "../../../../moment/locale/sw.js",
+	"./ta": "../../../../moment/locale/ta.js",
+	"./ta.js": "../../../../moment/locale/ta.js",
+	"./te": "../../../../moment/locale/te.js",
+	"./te.js": "../../../../moment/locale/te.js",
+	"./tet": "../../../../moment/locale/tet.js",
+	"./tet.js": "../../../../moment/locale/tet.js",
+	"./th": "../../../../moment/locale/th.js",
+	"./th.js": "../../../../moment/locale/th.js",
+	"./tl-ph": "../../../../moment/locale/tl-ph.js",
+	"./tl-ph.js": "../../../../moment/locale/tl-ph.js",
+	"./tlh": "../../../../moment/locale/tlh.js",
+	"./tlh.js": "../../../../moment/locale/tlh.js",
+	"./tr": "../../../../moment/locale/tr.js",
+	"./tr.js": "../../../../moment/locale/tr.js",
+	"./tzl": "../../../../moment/locale/tzl.js",
+	"./tzl.js": "../../../../moment/locale/tzl.js",
+	"./tzm": "../../../../moment/locale/tzm.js",
+	"./tzm-latn": "../../../../moment/locale/tzm-latn.js",
+	"./tzm-latn.js": "../../../../moment/locale/tzm-latn.js",
+	"./tzm.js": "../../../../moment/locale/tzm.js",
+	"./uk": "../../../../moment/locale/uk.js",
+	"./uk.js": "../../../../moment/locale/uk.js",
+	"./ur": "../../../../moment/locale/ur.js",
+	"./ur.js": "../../../../moment/locale/ur.js",
+	"./uz": "../../../../moment/locale/uz.js",
+	"./uz-latn": "../../../../moment/locale/uz-latn.js",
+	"./uz-latn.js": "../../../../moment/locale/uz-latn.js",
+	"./uz.js": "../../../../moment/locale/uz.js",
+	"./vi": "../../../../moment/locale/vi.js",
+	"./vi.js": "../../../../moment/locale/vi.js",
+	"./x-pseudo": "../../../../moment/locale/x-pseudo.js",
+	"./x-pseudo.js": "../../../../moment/locale/x-pseudo.js",
+	"./yo": "../../../../moment/locale/yo.js",
+	"./yo.js": "../../../../moment/locale/yo.js",
+	"./zh-cn": "../../../../moment/locale/zh-cn.js",
+	"./zh-cn.js": "../../../../moment/locale/zh-cn.js",
+	"./zh-hk": "../../../../moment/locale/zh-hk.js",
+	"./zh-hk.js": "../../../../moment/locale/zh-hk.js",
+	"./zh-tw": "../../../../moment/locale/zh-tw.js",
+	"./zh-tw.js": "../../../../moment/locale/zh-tw.js"
+};
+function webpackContext(req) {
+	return __webpack_require__(webpackContextResolve(req));
+};
+function webpackContextResolve(req) {
+	var id = map[req];
+	if(!(id + 1)) // check for number or string
+		throw new Error("Cannot find module '" + req + "'.");
+	return id;
+};
+webpackContext.keys = function webpackContextKeys() {
+	return Object.keys(map);
+};
+webpackContext.resolve = webpackContextResolve;
+module.exports = webpackContext;
+webpackContext.id = "../../../../moment/locale recursive ^\\.\\/.*$";
 
 /***/ }),
 

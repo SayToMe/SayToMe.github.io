@@ -3,6 +3,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 import 'rxjs/operators/map';
 
+import Chart from 'chart.js';
+
 interface IUser {
   id: number;
   name: string;
@@ -80,7 +82,22 @@ interface IJob {
   annotation_ids: number[];
 
   log: string;
-  parsed;
+  parsed: {
+    testsNum: string;
+    errors: string;
+    failures: string;
+    inconclusive: string;
+    time: string;
+    tests: {
+      shortName: string;
+      fullName: string;
+      duration: string;
+      collect0: string;
+      collect1: string;
+      collect2: string;
+      allocated: string;
+    }[];
+  };
 }
 
 @Component({
@@ -94,7 +111,9 @@ export class AppComponent {
 
   constructor(private httpClient: HttpClient) {
     this.auth();
-    this.getBuilds();
+    this.getBuilds().then(() => {
+      this.prepareChart();
+    });
   }
 
   private auth() {
@@ -115,7 +134,7 @@ export class AppComponent {
     const headers = this.getHeaders();
     const params = new HttpParams();
 
-    this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
+    return this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
       headers: headers
     })
       .toPromise()
@@ -125,28 +144,26 @@ export class AppComponent {
           build.commit = res.commits.find(c => c.id === build.commit_id);
         });
 
-        this.builds.forEach(build => {
+        return Promise.all(this.builds.map(build => {
           build.jobs = [];
 
-          build.job_ids.forEach((jobId) => {
+          return Promise.all(build.job_ids.map((jobId) => {
             return this.httpClient.get('https://api.travis-ci.org/jobs/' + jobId, {
               headers: headers
             })
-            .toPromise()
-            .then((r: { job: IJob, commit: ICommit }) => {
-              build.jobs.push(r.job);
-
-              return this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
               .toPromise()
-              .then((log: string) => {
-                  r.job.log = log;
-                  r.job.parsed = this.parseLog(log);
-              });
-            });
-          });
-        });
+              .then((r: { job: IJob, commit: ICommit }) => {
+                build.jobs.push(r.job);
 
-        return res.builds;
+                return this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
+                  .toPromise()
+                  .then((log: string) => {
+                    r.job.log = log;
+                    r.job.parsed = this.parseLog(log);
+                  });
+              });
+          }));
+        }));
       });
   }
 
@@ -184,6 +201,65 @@ export class AppComponent {
       tests: tests
     };
   }
+
+  private prepareChart() {
+    const dt = this.builds.map(b => b.jobs.map(j => {
+      return {
+        message: b.commit.message,
+        time: j.parsed.time
+      };
+    })).map(jobs => jobs[0]);
+
+    const labels = dt.map(j => j.message);
+    const data = dt.map(j => j.time);
+    const colors = dt.map(j => this.randomColorGenerator());
+
+    const ctx = (document.getElementById('performanceChart') as HTMLCanvasElement).getContext('2d');
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels, // ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [{
+          label: 'Tests execution time',
+          data: data, // [12, 19, 3, 5, 2, 3],
+          backgroundColor: colors,
+          borderColor: colors,
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false
+      }
+    });
+  }
+
+  private randomColorGenerator = (opacity = 0.5) => {
+    const hex = '#' + (Math.random().toString(16) + '0000000').slice(2, 8);
+    return this.hexToRgbA(hex, opacity);
+  }
+
+  private hexToRgbA = (hex: string, opacity: number) => {
+    let c;
+
+    if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+        c = hex.substring(1).split('');
+        if (c.length === 3) {
+            c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+        }
+        c = '0x' + c.join('');
+        // tslint:disable-next-line:no-bitwise
+        const r = (c >> 16) & 255;
+        // tslint:disable-next-line:no-bitwise
+        const g = (c >> 8) & 255;
+        // tslint:disable-next-line:no-bitwise
+        const b = c & 255;
+
+        return 'rgba(' + [r, g, b].join(',') + ',' + opacity + ')';
+    }
+
+    throw new Error('Bad Hex');
+}
 
   private getHeaders() {
     const headers = new HttpHeaders({
