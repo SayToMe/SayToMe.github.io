@@ -4,6 +4,9 @@
 <!-- <a href="https://api.travis-ci.com/auth/handshake">log in</a> -->
 
 <h3>Builds</h3>
+<span *ngIf="!builds || builds.length === 0">
+  Loading builds
+</span>
 <table *ngIf="builds && builds.length > 0">
   <thead>
     <th>Number</th>
@@ -27,7 +30,10 @@
           {{build.commit.message}}
       </td>
       <td>
-        <ul *ngIf="build.jobs">
+        <span *ngIf="!build.jobs || build.jobs.length === 0">
+          Loading jobs and logs
+        </span>
+        <ul *ngIf="build.jobs && build.jobs.length > 0">
           <ng-container *ngFor="let job of build.jobs">
               <li *ngIf="job.parsed">
                   Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.
