@@ -111,11 +111,15 @@ interface IJob {
 export class AppComponent {
   user: IUser;
   builds: IBuild[];
+  branchLastResult: any[];
 
   constructor(private httpClient: HttpClient) {
     this.auth();
     this.getBuilds().then(() => {
       this.prepareChart();
+    });
+    this.getBuilds().then(() => {
+      this.prepareLastBuilds();
     });
   }
 
@@ -214,14 +218,14 @@ export class AppComponent {
       errors: errors,
       failures: failures,
       inconclusive: inconclusive,
-      time: this.prettify(time),
+      time: this.prettify(+time * 100),
       referenceTime: this.prettify(referenceTime),
       tests: tests
     };
   }
 
   private prepareChart() {
-    const dt = this.builds.map(b => b.jobs.map(j => {
+    const dt = _.flatMap(this.builds, b => b.jobs.filter(j => !_.isNil(j.parsed)).map(j => {
       return {
         label: b.commit.branch + '(' + b.number + ')',
         message: b.commit.message,
@@ -229,7 +233,6 @@ export class AppComponent {
         referenceTime: j.parsed.referenceTime
       };
     }))
-    .map(jobs => _.first(jobs))
     .filter(job => !_.isEmpty(job.referenceTime));
 
     const labels = dt.map(j => j.label);
@@ -259,6 +262,22 @@ export class AppComponent {
         }
       }
     });
+  }
+
+  private prepareLastBuilds() {
+    const allBuilds = _.flatMap(this.builds, b => b.jobs.filter(j => !_.isNil(j.parsed)).map(j => {
+      return {
+        id: b.number,
+        branch: b.commit.branch,
+        fullTime: j.parsed.time,
+        referenceTime: j.parsed.referenceTime,
+        time: j.parsed.referenceTime && this.prettify((+j.parsed.referenceTime) / (+j.parsed.time))
+      };
+    }));
+
+    const lastBuilds = _.map(_.groupBy(allBuilds, b => b.branch), bs => _.maxBy(bs, b => b.id));
+
+    this.branchLastResult = lastBuilds;
   }
 
   private randomColorGenerator = (opacity = 0.5) => {
