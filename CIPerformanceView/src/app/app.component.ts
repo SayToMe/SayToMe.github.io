@@ -183,7 +183,7 @@ export class AppComponent {
     .filter(l => testInfoRegexp.test(l))
     .map(l => l.match(testInfoRegexp))
     .map(([str, name, duration, gc0, gc1, gc2, allocated]) => ({
-        shortName: name.slice(name[1].lastIndexOf('.') + 1),
+        shortName: name.slice(name.lastIndexOf('.') + 1),
         fullName: name,
         duration: duration,
         collect0: gc0,
