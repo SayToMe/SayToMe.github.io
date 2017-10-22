@@ -3,7 +3,8 @@ import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 
 import 'rxjs/operators/map';
 
-import Chart from 'chart.js';
+import * as ChartJS from 'chart.js';
+import * as _ from 'lodash';
 
 interface IUser {
   id: number;
@@ -171,27 +172,27 @@ export class AppComponent {
   private parseLog(log: string) {
     const lines = log.split(/[\r\n]/);
 
-    const r = /Execution Runtime: /;
-    const r2 = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
-    const testCheck = /\*\*\*\*\*/;
-    const r3 = /\*\*\*\*\* Test (.+)\. Took (\d*\.?\d*) ms. GC collects: (-?\d+) (-?\d+) (-?\d+) Allocated: (\d*\.?\d*) KB\./;
+    const executionRuntimeRegexp = /Execution Runtime: /;
+    const fullTestInfoRegexp = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
+    const testInfoRegexp = /\*\*\*\*\* Test (.+)\. Took (\d*\.?\d*) ms. GC collects: (-?\d+) (-?\d+) (-?\d+) Allocated: (\d*\.?\d*) KB\./;
 
-    const startTestLineIdx = lines.findIndex(l => r.test(l));
-    const endTestLineIdx = lines.findIndex(l => r2.test(l));
+    const startTestLineIdx = lines.findIndex(l => executionRuntimeRegexp.test(l));
+    const endTestLineIdx = lines.findIndex(l => fullTestInfoRegexp.test(l));
 
-    const tests = lines.slice(startTestLineIdx, endTestLineIdx).filter(l => r3.test(l)).map(l => l.match(r3)).map(rs => {
-      return {
-        shortName: rs[1].slice(rs[1].lastIndexOf('.') + 1),
-        fullName: rs[1],
-        duration: rs[2],
-        collect0: rs[3],
-        collect1: rs[4],
-        collect2: rs[5],
-        allocated: rs[6]
-      };
-    });
+    const tests = lines.slice(startTestLineIdx, endTestLineIdx)
+    .filter(l => testInfoRegexp.test(l))
+    .map(l => l.match(testInfoRegexp))
+    .map(([str, name, duration, gc0, gc1, gc2, allocated]) => ({
+        shortName: name.slice(name[1].lastIndexOf('.') + 1),
+        fullName: name,
+        duration: duration,
+        collect0: gc0,
+        collect1: gc1,
+        collect2: gc2,
+        allocated: allocated
+      }));
 
-    const [_, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(r2);
+    const [fullString, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(fullTestInfoRegexp);
     const referenceTest = tests.find(t => t.shortName === 'reference test');
     const referenceTime = referenceTest && referenceTest.duration;
 
@@ -214,15 +215,15 @@ export class AppComponent {
         referenceTime: j.parsed.referenceTime
       };
     }))
-    .map(jobs => jobs[0])
-    .filter(job => !!job.referenceTime);
+    .map(jobs => _.first(jobs))
+    .filter(job => !_.isEmpty(job.referenceTime));
 
     const labels = dt.map(j => j.message);
     const data = dt.map(j => (+j.time) / (+j.referenceTime));
     const colors = dt.map(j => this.randomColorGenerator());
 
     const ctx = (document.getElementById('performanceChart') as HTMLCanvasElement).getContext('2d');
-    const chart = new Chart(ctx, {
+    const chart = new ChartJS.Chart(ctx, {
       type: 'bar',
       data: {
         labels: labels,
@@ -247,20 +248,17 @@ export class AppComponent {
   }
 
   private hexToRgbA = (hex: string, opacity: number) => {
-    let c;
-
     if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
-        c = hex.substring(1).split('');
+        let c = hex.substring(1).split('');
+
         if (c.length === 3) {
             c = [c[0], c[0], c[1], c[1], c[2], c[2]];
         }
-        c = '0x' + c.join('');
-        // tslint:disable-next-line:no-bitwise
-        const r = (c >> 16) & 255;
-        // tslint:disable-next-line:no-bitwise
-        const g = (c >> 8) & 255;
-        // tslint:disable-next-line:no-bitwise
-        const b = c & 255;
+
+        const res = '0x' + c.join('');
+        const r = c[0] + c[1];
+        const g = c[2] + c[3];
+        const b = c[4] + c[5];
 
         return 'rgba(' + [r, g, b].join(',') + ',' + opacity + ')';
     }
