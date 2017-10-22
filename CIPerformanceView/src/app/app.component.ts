@@ -210,6 +210,7 @@ export class AppComponent {
   private prepareChart() {
     const dt = this.builds.map(b => b.jobs.map(j => {
       return {
+        label: b.commit.branch + '(' + b.number + ')',
         message: b.commit.message,
         time: j.parsed.time,
         referenceTime: j.parsed.referenceTime
@@ -218,7 +219,7 @@ export class AppComponent {
     .map(jobs => _.first(jobs))
     .filter(job => !_.isEmpty(job.referenceTime));
 
-    const labels = dt.map(j => j.message);
+    const labels = dt.map(j => j.label);
     const data = dt.map(j => (+j.time) / (+j.referenceTime));
     const colors = dt.map(j => this.randomColorGenerator());
 
@@ -237,34 +238,22 @@ export class AppComponent {
       },
       options: {
         responsive: true,
-        maintainAspectRatio: false
+        maintainAspectRatio: false,
+        tooltips: {
+          callbacks: {
+            label: (s) => dt[s.index].message
+          }
+        }
       }
     });
   }
 
   private randomColorGenerator = (opacity = 0.5) => {
-    const hex = '#' + (Math.random().toString(16) + '0000000').slice(2, 8);
-    return this.hexToRgbA(hex, opacity);
+    const r = Math.random() * 256;
+    const g = Math.random() * 256;
+    const b = Math.random() * 256;
+    return 'rgba(' + [r.toFixed(), g.toFixed(), b.toFixed(), opacity].join(',') + ')';
   }
-
-  private hexToRgbA = (hex: string, opacity: number) => {
-    if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
-        let c = hex.substring(1).split('');
-
-        if (c.length === 3) {
-            c = [c[0], c[0], c[1], c[1], c[2], c[2]];
-        }
-
-        const res = '0x' + c.join('');
-        const r = c[0] + c[1];
-        const g = c[2] + c[3];
-        const b = c[4] + c[5];
-
-        return 'rgba(' + [r, g, b].join(',') + ',' + opacity + ')';
-    }
-
-    throw new Error('Bad Hex');
-}
 
   private getHeaders() {
     const headers = new HttpHeaders({
