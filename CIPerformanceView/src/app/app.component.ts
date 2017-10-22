@@ -88,6 +88,7 @@ interface IJob {
     failures: string;
     inconclusive: string;
     time: string;
+    referenceTime: string;
     tests: {
       shortName: string;
       fullName: string;
@@ -191,6 +192,8 @@ export class AppComponent {
     });
 
     const [_, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(r2);
+    const referenceTest = tests.find(t => t.shortName === 'reference test');
+    const referenceTime = referenceTest && referenceTest.duration;
 
     return {
       testsNum: testsNum,
@@ -198,6 +201,7 @@ export class AppComponent {
       failures: failures,
       inconclusive: inconclusive,
       time: time,
+      referenceTime: referenceTime,
       tests: tests
     };
   }
@@ -206,22 +210,25 @@ export class AppComponent {
     const dt = this.builds.map(b => b.jobs.map(j => {
       return {
         message: b.commit.message,
-        time: j.parsed.time
+        time: j.parsed.time,
+        referenceTime: j.parsed.referenceTime
       };
-    })).map(jobs => jobs[0]);
+    }))
+    .map(jobs => jobs[0])
+    .filter(job => !!job.referenceTime);
 
     const labels = dt.map(j => j.message);
-    const data = dt.map(j => j.time);
+    const data = dt.map(j => (+j.time) / (+j.referenceTime));
     const colors = dt.map(j => this.randomColorGenerator());
 
     const ctx = (document.getElementById('performanceChart') as HTMLCanvasElement).getContext('2d');
     const chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: labels, // ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        labels: labels,
         datasets: [{
-          label: 'Tests execution time',
-          data: data, // [12, 19, 3, 5, 2, 3],
+          label: 'Tests execution time (time/reference)',
+          data: data,
           backgroundColor: colors,
           borderColor: colors,
           borderWidth: 1
