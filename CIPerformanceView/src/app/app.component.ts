@@ -94,6 +94,7 @@ interface IJob {
       shortName: string;
       fullName: string;
       duration: string;
+      referencedDuration: string;
       collect0: string;
       collect1: string;
       collect2: string;
@@ -179,30 +180,42 @@ export class AppComponent {
     const startTestLineIdx = lines.findIndex(l => executionRuntimeRegexp.test(l));
     const endTestLineIdx = lines.findIndex(l => fullTestInfoRegexp.test(l));
 
-    const tests = lines.slice(startTestLineIdx, endTestLineIdx)
-    .filter(l => testInfoRegexp.test(l))
-    .map(l => l.match(testInfoRegexp))
-    .map(([str, name, duration, gc0, gc1, gc2, allocated]) => ({
-        shortName: name.slice(name.lastIndexOf('.') + 1),
-        fullName: name,
-        duration: duration,
-        collect0: gc0,
-        collect1: gc1,
-        collect2: gc2,
-        allocated: allocated
-      }));
+    const tests = lines
+      .slice(startTestLineIdx, endTestLineIdx)
+      .filter(l => testInfoRegexp.test(l))
+      .map(l => l.match(testInfoRegexp))
+      .map(([str, name, duration, gc0, gc1, gc2, allocated]) => ({
+          shortName: name.slice(name.lastIndexOf('.') + 1),
+          fullName: name,
+          duration: duration,
+          referencedDuration: null,
+          collect0: gc0,
+          collect1: gc1,
+          collect2: gc2,
+          allocated: allocated
+        }));
 
     const [fullString, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(fullTestInfoRegexp);
     const referenceTest = tests.find(t => t.shortName === 'reference test');
     const referenceTime = referenceTest && referenceTest.duration;
+
+    if (!_.isEmpty(referenceTime)) {
+      tests.forEach(t => {
+        t.referencedDuration = this.prettify((+t.duration) / (+referenceTime));
+      });
+    }
+
+    tests.forEach(t => {
+      t.duration = this.prettify(t.duration);
+    });
 
     return {
       testsNum: testsNum,
       errors: errors,
       failures: failures,
       inconclusive: inconclusive,
-      time: time,
-      referenceTime: referenceTime,
+      time: this.prettify(time),
+      referenceTime: this.prettify(referenceTime),
       tests: tests
     };
   }
@@ -253,6 +266,19 @@ export class AppComponent {
     const g = Math.random() * 256;
     const b = Math.random() * 256;
     return 'rgba(' + [r.toFixed(), g.toFixed(), b.toFixed(), opacity].join(',') + ')';
+  }
+
+  private prettify(val: string | number, digitsAfterDot = 2) {
+    if (_.isNil(val)) {
+      return val;
+    } else if (_.isNumber(val)) {
+      return val.toFixed(digitsAfterDot);
+    } else {
+      const dotIndex = val.indexOf('.');
+      return dotIndex === -1
+        ? val
+        : val.slice(0, dotIndex + 3);
+    }
   }
 
   private getHeaders() {

@@ -45,6 +45,7 @@
                     <thead>
                       <th>Name</th>
                       <th>Duration (ms)</th>
+                      <th>Referenced duration</th>
                       <th>GC0</th>
                       <th>GC1</th>
                       <th>GC2</th>
@@ -54,6 +55,7 @@
                       <tr *ngFor="let t of job.parsed.tests">
                         <td>{{t.shortName}}</td>
                         <td>{{t.duration}}</td>
+                        <td>{{t.referencedDuration}}</td>
                         <td>{{t.collect0}}</td>
                         <td>{{t.collect1}}</td>
                         <td>{{t.collect2}}</td>
