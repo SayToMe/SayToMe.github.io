@@ -7,10 +7,24 @@
   <canvas id="performanceChart" class="performance-chart"></canvas>
 </div>
 
-<h3>Builds</h3>
-<span *ngIf="!builds || builds.length === 0">
+<h3>Last builds</h3>
+<span *ngIf="!branchLastResult || branchLastResult.length === 0">
   Loading builds
 </span>
+<table *ngIf="branchLastResult && branchLastResult.length > 0">
+  <thead>
+    <th>Branch</th>
+    <th>Time</th>
+  </thead>
+  <tbody>
+    <tr *ngFor="let build of branchLastResult">
+      <td>{{build.branch}}</td>
+      <td>{{build.time}}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Builds</h3>
 <table *ngIf="builds && builds.length > 0">
   <thead>
     <th>Number</th>
