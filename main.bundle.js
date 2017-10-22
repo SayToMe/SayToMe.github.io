@@ -38,7 +38,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<div class=\"charts\" style=\"margin-left: 50px; margin-right: 50px; height: 500px;\">\n  <canvas id=\"performanceChart\" class=\"performance-chart\"></canvas>\n</div>\n\n<h3>Builds</h3>\n<span *ngIf=\"!builds || builds.length === 0\">\n  Loading builds\n</span>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <span *ngIf=\"!build.jobs || build.jobs.length === 0\">\n          Loading jobs and logs\n        </span>\n        <ul *ngIf=\"build.jobs && build.jobs.length > 0\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.parsed\">\n                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.\n                  <table *ngIf=\"job.parsed.tests && job.parsed.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.parsed.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.collect0}}</td>\n                        <td>{{t.collect1}}</td>\n                        <td>{{t.collect2}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
+module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<div class=\"charts\" style=\"margin-left: 50px; margin-right: 50px; height: 500px;\">\n  <canvas id=\"performanceChart\" class=\"performance-chart\"></canvas>\n</div>\n\n<h3>Builds</h3>\n<span *ngIf=\"!builds || builds.length === 0\">\n  Loading builds\n</span>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <span *ngIf=\"!build.jobs || build.jobs.length === 0\">\n          Loading jobs and logs\n        </span>\n        <ul *ngIf=\"build.jobs && build.jobs.length > 0\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.parsed\">\n                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.\n                  <table *ngIf=\"job.parsed.tests && job.parsed.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>Referenced duration</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.parsed.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.referencedDuration}}</td>\n                        <td>{{t.collect0}}</td>\n                        <td>{{t.collect1}}</td>\n                        <td>{{t.collect2}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
 
 /***/ }),
 
@@ -53,6 +53,8 @@ module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.nam
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_operators_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_operators_map__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_chart_js__ = __webpack_require__("../../../../chart.js/src/chart.js");
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_chart_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_chart_js__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_lodash__ = __webpack_require__("../../../../lodash/lodash.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_lodash___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_lodash__);
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -66,130 +68,127 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
-var AppComponent = (function () {
-    function AppComponent(httpClient) {
-        var _this = this;
+
+let AppComponent = class AppComponent {
+    constructor(httpClient) {
         this.httpClient = httpClient;
-        this.randomColorGenerator = function (opacity) {
-            if (opacity === void 0) { opacity = 0.5; }
-            var hex = '#' + (Math.random().toString(16) + '0000000').slice(2, 8);
-            return _this.hexToRgbA(hex, opacity);
-        };
-        this.hexToRgbA = function (hex, opacity) {
-            var c;
-            if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
-                c = hex.substring(1).split('');
-                if (c.length === 3) {
-                    c = [c[0], c[0], c[1], c[1], c[2], c[2]];
-                }
-                c = '0x' + c.join('');
-                // tslint:disable-next-line:no-bitwise
-                var r = (c >> 16) & 255;
-                // tslint:disable-next-line:no-bitwise
-                var g = (c >> 8) & 255;
-                // tslint:disable-next-line:no-bitwise
-                var b = c & 255;
-                return 'rgba(' + [r, g, b].join(',') + ',' + opacity + ')';
-            }
-            throw new Error('Bad Hex');
+        this.randomColorGenerator = (opacity = 0.5) => {
+            const r = Math.random() * 256;
+            const g = Math.random() * 256;
+            const b = Math.random() * 256;
+            return 'rgba(' + [r.toFixed(), g.toFixed(), b.toFixed(), opacity].join(',') + ')';
         };
         this.auth();
-        this.getBuilds().then(function () {
-            _this.prepareChart();
+        this.getBuilds().then(() => {
+            this.prepareChart();
         });
     }
-    AppComponent.prototype.auth = function () {
-        var _this = this;
-        var headers = this.getHeaders();
+    auth() {
+        const headers = this.getHeaders();
         return this.httpClient.get('https://api.travis-ci.org/users', {
             headers: headers
         })
             .toPromise()
-            .then(function (res) {
-            _this.user = res.user;
+            .then((res) => {
+            this.user = res.user;
             return res.user;
         });
-    };
-    AppComponent.prototype.getBuilds = function () {
-        var _this = this;
-        var headers = this.getHeaders();
-        var params = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["d" /* HttpParams */]();
+    }
+    getBuilds() {
+        const headers = this.getHeaders();
+        const params = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["d" /* HttpParams */]();
         return this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
             headers: headers
         })
             .toPromise()
-            .then(function (res) {
-            _this.builds = res.builds;
-            _this.builds.forEach(function (build) {
-                build.commit = res.commits.find(function (c) { return c.id === build.commit_id; });
+            .then((res) => {
+            this.builds = res.builds;
+            this.builds.forEach(build => {
+                build.commit = res.commits.find(c => c.id === build.commit_id);
             });
-            return Promise.all(_this.builds.map(function (build) {
+            return Promise.all(this.builds.map(build => {
                 build.jobs = [];
-                return Promise.all(build.job_ids.map(function (jobId) {
-                    return _this.httpClient.get('https://api.travis-ci.org/jobs/' + jobId, {
+                return Promise.all(build.job_ids.map((jobId) => {
+                    return this.httpClient.get('https://api.travis-ci.org/jobs/' + jobId, {
                         headers: headers
                     })
                         .toPromise()
-                        .then(function (r) {
+                        .then((r) => {
                         build.jobs.push(r.job);
-                        return _this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
+                        return this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
                             .toPromise()
-                            .then(function (log) {
+                            .then((log) => {
                             r.job.log = log;
-                            r.job.parsed = _this.parseLog(log);
+                            r.job.parsed = this.parseLog(log);
                         });
                     });
                 }));
             }));
         });
-    };
-    AppComponent.prototype.parseLog = function (log) {
-        var lines = log.split(/[\r\n]/);
-        var r = /Execution Runtime: /;
-        var r2 = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
-        var testCheck = /\*\*\*\*\*/;
-        var r3 = /\*\*\*\*\* Test (.+)\. Took (\d*\.?\d*) ms. GC collects: (-?\d+) (-?\d+) (-?\d+) Allocated: (\d*\.?\d*) KB\./;
-        var startTestLineIdx = lines.findIndex(function (l) { return r.test(l); });
-        var endTestLineIdx = lines.findIndex(function (l) { return r2.test(l); });
-        var tests = lines.slice(startTestLineIdx, endTestLineIdx).filter(function (l) { return r3.test(l); }).map(function (l) { return l.match(r3); }).map(function (rs) {
-            return {
-                shortName: rs[1].slice(rs[1].lastIndexOf('.') + 1),
-                fullName: rs[1],
-                duration: rs[2],
-                collect0: rs[3],
-                collect1: rs[4],
-                collect2: rs[5],
-                allocated: rs[6]
-            };
+    }
+    parseLog(log) {
+        const lines = log.split(/[\r\n]/);
+        const executionRuntimeRegexp = /Execution Runtime: /;
+        const fullTestInfoRegexp = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
+        const testInfoRegexp = /\*\*\*\*\* Test (.+)\. Took (\d*\.?\d*) ms. GC collects: (-?\d+) (-?\d+) (-?\d+) Allocated: (\d*\.?\d*) KB\./;
+        const startTestLineIdx = lines.findIndex(l => executionRuntimeRegexp.test(l));
+        const endTestLineIdx = lines.findIndex(l => fullTestInfoRegexp.test(l));
+        const tests = lines
+            .slice(startTestLineIdx, endTestLineIdx)
+            .filter(l => testInfoRegexp.test(l))
+            .map(l => l.match(testInfoRegexp))
+            .map(([str, name, duration, gc0, gc1, gc2, allocated]) => ({
+            shortName: name.slice(name.lastIndexOf('.') + 1),
+            fullName: name,
+            duration: duration,
+            referencedDuration: null,
+            collect0: gc0,
+            collect1: gc1,
+            collect2: gc2,
+            allocated: allocated
+        }));
+        const [fullString, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(fullTestInfoRegexp);
+        const referenceTest = tests.find(t => t.shortName === 'reference test');
+        const referenceTime = referenceTest && referenceTest.duration;
+        if (!__WEBPACK_IMPORTED_MODULE_4_lodash__["isEmpty"](referenceTime)) {
+            tests.forEach(t => {
+                t.referencedDuration = this.prettify((+t.duration) / (+referenceTime));
+            });
+        }
+        tests.forEach(t => {
+            t.duration = this.prettify(t.duration);
         });
-        var _a = lines[endTestLineIdx].match(r2), _ = _a[0], testsNum = _a[1], errors = _a[2], failures = _a[3], inconclusive = _a[4], time = _a[5];
         return {
             testsNum: testsNum,
             errors: errors,
             failures: failures,
             inconclusive: inconclusive,
-            time: time,
+            time: this.prettify(time),
+            referenceTime: this.prettify(referenceTime),
             tests: tests
         };
-    };
-    AppComponent.prototype.prepareChart = function () {
-        var _this = this;
-        var dt = this.builds.map(function (b) { return b.jobs.map(function (j) {
+    }
+    prepareChart() {
+        const dt = this.builds.map(b => b.jobs.map(j => {
             return {
+                label: b.commit.branch + '(' + b.number + ')',
                 message: b.commit.message,
-                time: j.parsed.time
+                time: j.parsed.time,
+                referenceTime: j.parsed.referenceTime
             };
-        }); }).map(function (jobs) { return jobs[0]; });
-        var labels = dt.map(function (j) { return j.message; });
-        var data = dt.map(function (j) { return j.time; });
-        var colors = dt.map(function (j) { return _this.randomColorGenerator(); });
-        var ctx = document.getElementById('performanceChart').getContext('2d');
-        var chart = new __WEBPACK_IMPORTED_MODULE_3_chart_js___default.a(ctx, {
+        }))
+            .map(jobs => __WEBPACK_IMPORTED_MODULE_4_lodash__["first"](jobs))
+            .filter(job => !__WEBPACK_IMPORTED_MODULE_4_lodash__["isEmpty"](job.referenceTime));
+        const labels = dt.map(j => j.label);
+        const data = dt.map(j => (+j.time) / (+j.referenceTime));
+        const colors = dt.map(j => this.randomColorGenerator());
+        const ctx = document.getElementById('performanceChart').getContext('2d');
+        const chart = new __WEBPACK_IMPORTED_MODULE_3_chart_js__["Chart"](ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                        label: 'Tests execution time',
+                        label: 'Tests execution time (time/reference)',
                         data: data,
                         backgroundColor: colors,
                         borderColor: colors,
@@ -198,19 +197,37 @@ var AppComponent = (function () {
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                tooltips: {
+                    callbacks: {
+                        label: (s) => dt[s.index].message
+                    }
+                }
             }
         });
-    };
-    AppComponent.prototype.getHeaders = function () {
-        var headers = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["c" /* HttpHeaders */]({
+    }
+    prettify(val, digitsAfterDot = 2) {
+        if (__WEBPACK_IMPORTED_MODULE_4_lodash__["isNil"](val)) {
+            return val;
+        }
+        else if (__WEBPACK_IMPORTED_MODULE_4_lodash__["isNumber"](val)) {
+            return val.toFixed(digitsAfterDot);
+        }
+        else {
+            const dotIndex = val.indexOf('.');
+            return dotIndex === -1
+                ? val
+                : val.slice(0, dotIndex + 3);
+        }
+    }
+    getHeaders() {
+        const headers = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["c" /* HttpHeaders */]({
             'Accept': 'application/vnd.travis-ci.2+json',
             'Authorization': 'token "uJeDK6yjk6Gt9HtfRNec-w"'
         });
         return headers;
-    };
-    return AppComponent;
-}());
+    }
+};
 AppComponent = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["n" /* Component */])({
         selector: 'app-root',
@@ -244,11 +261,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 
 
 
-var AppModule = (function () {
-    function AppModule() {
-    }
-    return AppModule;
-}());
+let AppModule = class AppModule {
+};
 AppModule = __decorate([
     Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["L" /* NgModule */])({
         declarations: [
@@ -271,15 +285,11 @@ AppModule = __decorate([
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return environment; });
-// The file contents for the current environment will overwrite these during build.
-// The build system defaults to the dev environment which uses `environment.ts`, but if you do
-// `ng build --env=prod` then `environment.prod.ts` will be used instead.
-// The list of which env maps to which file can be found in `.angular-cli.json`.
-// The file contents for the current environment will overwrite these during build.
-var environment = {
+const environment = {
     production: false
 };
+/* harmony export (immutable) */ __webpack_exports__["a"] = environment;
+
 //# sourceMappingURL=environment.js.map
 
 /***/ }),
@@ -301,7 +311,7 @@ if (__WEBPACK_IMPORTED_MODULE_3__environments_environment__["a" /* environment *
     Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["_19" /* enableProdMode */])();
 }
 Object(__WEBPACK_IMPORTED_MODULE_1__angular_platform_browser_dynamic__["a" /* platformBrowserDynamic */])().bootstrapModule(__WEBPACK_IMPORTED_MODULE_2__app_app_module__["a" /* AppModule */])
-    .catch(function (err) { return console.log(err); });
+    .catch(err => console.log(err));
 //# sourceMappingURL=main.js.map
 
 /***/ }),
