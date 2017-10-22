@@ -38,7 +38,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<div class=\"charts\" style=\"margin-left: 50px; margin-right: 50px; height: 500px;\">\n  <canvas id=\"performanceChart\" class=\"performance-chart\"></canvas>\n</div>\n\n<h3>Builds</h3>\n<span *ngIf=\"!builds || builds.length === 0\">\n  Loading builds\n</span>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <span *ngIf=\"!build.jobs || build.jobs.length === 0\">\n          Loading jobs and logs\n        </span>\n        <ul *ngIf=\"build.jobs && build.jobs.length > 0\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.parsed\">\n                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.\n                  <table *ngIf=\"job.parsed.tests && job.parsed.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>Referenced duration</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.parsed.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.referencedDuration}}</td>\n                        <td>{{t.collect0}}</td>\n                        <td>{{t.collect1}}</td>\n                        <td>{{t.collect2}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
+module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<div class=\"charts\" style=\"margin-left: 50px; margin-right: 50px; height: 500px;\">\n  <canvas id=\"performanceChart\" class=\"performance-chart\"></canvas>\n</div>\n\n<h3>Last builds</h3>\n<span *ngIf=\"!branchLastResult || branchLastResult.length === 0\">\n  Loading builds\n</span>\n<table *ngIf=\"branchLastResult && branchLastResult.length > 0\">\n  <thead>\n    <th>Branch</th>\n    <th>Time</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of branchLastResult\">\n      <td>{{build.branch}}</td>\n      <td>{{build.time}}</td>\n    </tr>\n  </tbody>\n</table>\n\n<h3>Builds</h3>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <span *ngIf=\"!build.jobs || build.jobs.length === 0\">\n          Loading jobs and logs\n        </span>\n        <ul *ngIf=\"build.jobs && build.jobs.length > 0\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.parsed\">\n                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.\n                  <table *ngIf=\"job.parsed.tests && job.parsed.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>Referenced duration</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.parsed.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.referencedDuration}}</td>\n                        <td>{{t.collect0}}</td>\n                        <td>{{t.collect1}}</td>\n                        <td>{{t.collect2}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
 
 /***/ }),
 
@@ -81,6 +81,9 @@ let AppComponent = class AppComponent {
         this.auth();
         this.getBuilds().then(() => {
             this.prepareChart();
+        });
+        this.getBuilds().then(() => {
+            this.prepareLastBuilds();
         });
     }
     auth() {
@@ -163,13 +166,13 @@ let AppComponent = class AppComponent {
             errors: errors,
             failures: failures,
             inconclusive: inconclusive,
-            time: this.prettify(time),
+            time: this.prettify(+time * 100),
             referenceTime: this.prettify(referenceTime),
             tests: tests
         };
     }
     prepareChart() {
-        const dt = this.builds.map(b => b.jobs.map(j => {
+        const dt = __WEBPACK_IMPORTED_MODULE_4_lodash__["flatMap"](this.builds, b => b.jobs.filter(j => !__WEBPACK_IMPORTED_MODULE_4_lodash__["isNil"](j.parsed)).map(j => {
             return {
                 label: b.commit.branch + '(' + b.number + ')',
                 message: b.commit.message,
@@ -177,7 +180,6 @@ let AppComponent = class AppComponent {
                 referenceTime: j.parsed.referenceTime
             };
         }))
-            .map(jobs => __WEBPACK_IMPORTED_MODULE_4_lodash__["first"](jobs))
             .filter(job => !__WEBPACK_IMPORTED_MODULE_4_lodash__["isEmpty"](job.referenceTime));
         const labels = dt.map(j => j.label);
         const data = dt.map(j => (+j.time) / (+j.referenceTime));
@@ -205,6 +207,19 @@ let AppComponent = class AppComponent {
                 }
             }
         });
+    }
+    prepareLastBuilds() {
+        const allBuilds = __WEBPACK_IMPORTED_MODULE_4_lodash__["flatMap"](this.builds, b => b.jobs.filter(j => !__WEBPACK_IMPORTED_MODULE_4_lodash__["isNil"](j.parsed)).map(j => {
+            return {
+                id: b.number,
+                branch: b.commit.branch,
+                fullTime: j.parsed.time,
+                referenceTime: j.parsed.referenceTime,
+                time: j.parsed.referenceTime && this.prettify((+j.parsed.referenceTime) / (+j.parsed.time))
+            };
+        }));
+        const lastBuilds = __WEBPACK_IMPORTED_MODULE_4_lodash__["map"](__WEBPACK_IMPORTED_MODULE_4_lodash__["groupBy"](allBuilds, b => b.branch), bs => __WEBPACK_IMPORTED_MODULE_4_lodash__["maxBy"](bs, b => b.id));
+        this.branchLastResult = lastBuilds;
     }
     prettify(val, digitsAfterDot = 2) {
         if (__WEBPACK_IMPORTED_MODULE_4_lodash__["isNil"](val)) {
