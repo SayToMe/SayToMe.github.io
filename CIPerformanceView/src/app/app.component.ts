@@ -6,102 +6,8 @@ import 'rxjs/operators/map';
 import * as ChartJS from 'chart.js';
 import * as _ from 'lodash';
 
-interface IUser {
-  id: number;
-  name: string;
-  login: string;
-  email: string;
-  gravatar_id: string;
-  avatar_url: string;
-  locale: string;
-  is_syncing: boolean;
-  synced_at: string;
-  correct_scopes: boolean;
-  created_at: string;
-  channels: string[];
-}
-
-interface IBuild {
-  commit_id: number;
-  config: Object;
-  duration: number;
-  finished_at: string;
-  id: number;
-  job_ids: number[];
-  number: string;
-  pull_request: boolean;
-  pull_request_number: string;
-  pull_request_title: string;
-  repository_id: number;
-  started_at: string;
-  state: string;
-
-  commit: ICommit;
-  logs: any[];
-  jobs: IJob[];
-}
-
-interface ICommit {
-  author_email: string;
-  author_name: string;
-  branch: string;
-  committed_at: string;
-  committer_email: string;
-  committer_name: string;
-  compare_url: string;
-  id: number;
-  message: string;
-  pull_request_number?: number;
-  sha: string;
-  tag?: string;
-}
-
-interface IJob {
-  id: number;
-  repository_id: number;
-  repository_slug: string;
-  stage_id?: number;
-  build_id: number;
-  commit_id: number;
-  number: string;
-  config: {
-    language: string;
-    sudo: boolean,
-    before_install: string[];
-    script: string[];
-    result: string;
-    group: string;
-    dist: string;
-    os: string
-  };
-  state: string;
-  started_at: string;
-  finished_at: string;
-  queue: string;
-  allow_failure: boolean;
-  tags?: string;
-  annotation_ids: number[];
-
-  log: string;
-  parsed: {
-    testsNum: string;
-    errors: string;
-    failures: string;
-    inconclusive: string;
-    time: string;
-    referenceTime: string;
-    tests: {
-      shortName: string;
-      fullName: string;
-      duration: string;
-      referencedDuration: string;
-      collect0: string;
-      collect1: string;
-      collect2: string;
-      allocated: string;
-    }[];
-  };
-}
+import { JenkinsDefinitions } from './definitions/jenkins-definitions';
+import { AppVeyorDefinitons } from './definitions/app-veyor-definitions';
 
 @Component({
   selector: 'app-root',
@@ -109,8 +15,8 @@ interface IJob {
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  user: IUser;
-  builds: IBuild[];
+  user: JenkinsDefinitions.IUser;
+  builds: JenkinsDefinitions.IBuild[];
   branchLastResult: any[];
 
   constructor(private httpClient: HttpClient) {
@@ -124,13 +30,13 @@ export class AppComponent {
   }
 
   private auth() {
-    const headers = this.getHeaders();
+    const headers = this.getJenkinsHeaders();
 
     return this.httpClient.get('https://api.travis-ci.org/users', {
       headers: headers
     })
       .toPromise()
-      .then((res: { user: IUser }) => {
+      .then((res: { user: JenkinsDefinitions.IUser }) => {
         this.user = res.user;
 
         return res.user;
@@ -138,14 +44,14 @@ export class AppComponent {
   }
 
   private getBuilds() {
-    const headers = this.getHeaders();
+    const headers = this.getJenkinsHeaders();
     const params = new HttpParams();
 
     return this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
       headers: headers
     })
       .toPromise()
-      .then((res: { builds: IBuild[], commits: ICommit[] }) => {
+      .then((res: { builds: JenkinsDefinitions.IBuild[], commits: JenkinsDefinitions.ICommit[] }) => {
         this.builds = res.builds;
         this.builds.forEach(build => {
           build.commit = res.commits.find(c => c.id === build.commit_id);
@@ -159,7 +65,7 @@ export class AppComponent {
               headers: headers
             })
               .toPromise()
-              .then((r: { job: IJob, commit: ICommit }) => {
+              .then((r: { job: JenkinsDefinitions.IJob, commit: JenkinsDefinitions.ICommit }) => {
                 build.jobs.push(r.job);
 
                 return this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
@@ -300,10 +206,18 @@ export class AppComponent {
     }
   }
 
-  private getHeaders() {
+  private getJenkinsHeaders() {
     const headers = new HttpHeaders({
       'Accept': 'application/vnd.travis-ci.2+json',
       'Authorization': 'token "uJeDK6yjk6Gt9HtfRNec-w"'
+    });
+
+    return headers;
+  }
+
+  private getAppVeyorHeaders() {
+    const headers = new HttpHeaders({
+      'Authorization': 'Bearer 7t97fs85nh82dj3fd71a'
     });
 
     return headers;
