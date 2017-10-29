@@ -36,7 +36,7 @@ export class LogParser {
 
         if (!_.isEmpty(referenceTime)) {
             tests.forEach(t => {
-                t.referencedDuration = Time.fromMilliSeconds((+t.duration) / (+referenceTime));
+                t.referencedDuration = Time.fromMilliSeconds(t.duration.toMilliseconds() / referenceTime.toMilliseconds());
             });
         }
 
