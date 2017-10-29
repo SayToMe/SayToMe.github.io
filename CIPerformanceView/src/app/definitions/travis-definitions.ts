@@ -1,6 +1,10 @@
 'use strict';
 
-export module JenkinsDefinitions {
+import * as Common from './common';
+
+import { LogParser } from '../utils/log-parser';
+
+export module TravisDefinitions {
     export interface IUser {
         id: number;
         name: string;
@@ -14,6 +18,15 @@ export module JenkinsDefinitions {
         correct_scopes: boolean;
         created_at: string;
         channels: string[];
+    }
+
+    export function toCommonUser(user: IUser) {
+        return <Common.IUser>{
+            name: user.name,
+            login: user.login,
+            email: user.email,
+            avatar_url: user.avatar_url
+        };
     }
 
     export interface IBuild {
@@ -36,6 +49,18 @@ export module JenkinsDefinitions {
         jobs: IJob[];
     }
 
+    export function toCommonBuild(build: IBuild) {
+        return <Common.IBuild>{
+            number: +build.number,
+            commit: toCommonCommit(build.commit),
+            duration: Common.Time.fromMilliSeconds(build.duration),
+            finished: new Date(build.finished_at),
+            jobs: build.jobs.map(job => toCommonJob(job)),
+            started: new Date(build.started_at),
+            state: build.state
+        };
+    }
+
     export interface ICommit {
         author_email: string;
         author_name: string;
@@ -49,6 +74,16 @@ export module JenkinsDefinitions {
         pull_request_number?: number;
         sha: string;
         tag?: string;
+    }
+
+    export function toCommonCommit(commit: ICommit) {
+        return <Common.ICommit>{
+            branch: commit.branch,
+            committed: new Date(commit.committed_at),
+            committer_email: commit.committer_email,
+            committer_name: commit.committer_name,
+            message: commit.message
+        };
     }
 
     export interface IJob {
@@ -78,23 +113,15 @@ export module JenkinsDefinitions {
         annotation_ids: number[];
 
         log: string;
-        parsed: {
-            testsNum: string;
-            errors: string;
-            failures: string;
-            inconclusive: string;
-            time: string;
-            referenceTime: string;
-            tests: {
-                shortName: string;
-                fullName: string;
-                duration: string;
-                referencedDuration: string;
-                collect0: string;
-                collect1: string;
-                collect2: string;
-                allocated: string;
-            }[];
+    }
+
+    export function toCommonJob(job: IJob) {
+        return <Common.IJob>{
+            finished: new Date(job.finished_at),
+            started: new Date(job.started_at),
+            state: job.state,
+            info: LogParser.parseLog(job.log)
         };
     }
 }
+

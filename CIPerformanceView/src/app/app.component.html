@@ -36,10 +36,10 @@
   <tbody>
     <tr *ngFor="let build of builds">
       <td>
-          {{build.number}}
+         {{build.number}}
       </td>
       <td>
-         {{build.finished_at}}
+         {{build.finished}}
       </td>
       <td>
           {{build.state}}
@@ -53,9 +53,9 @@
         </span>
         <ul *ngIf="build.jobs && build.jobs.length > 0">
           <ng-container *ngFor="let job of build.jobs">
-              <li *ngIf="job.parsed">
-                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.
-                  <table *ngIf="job.parsed.tests && job.parsed.tests.length > 0">
+              <li *ngIf="job.info">
+                  Run: {{job.info.testsCount}}. Failures: {{job.info.failuresCount}}. Total time: {{job.info.time}}.
+                  <table *ngIf="job.info.tests && job.info.tests.length > 0">
                     <thead>
                       <th>Name</th>
                       <th>Duration (ms)</th>
@@ -66,13 +66,13 @@
                       <th>Allocated (KB)</th>
                     </thead>
                     <tbody>
-                      <tr *ngFor="let t of job.parsed.tests">
+                      <tr *ngFor="let t of job.info.tests">
                         <td>{{t.shortName}}</td>
                         <td>{{t.duration}}</td>
                         <td>{{t.referencedDuration}}</td>
-                        <td>{{t.collect0}}</td>
-                        <td>{{t.collect1}}</td>
-                        <td>{{t.collect2}}</td>
+                        <td>{{t.gc0count}}</td>
+                        <td>{{t.gc1count}}</td>
+                        <td>{{t.gc2count}}</td>
                         <td>{{t.allocated}}</td>
                       </tr>
                     </tbody>
