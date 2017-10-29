@@ -493,7 +493,7 @@ class LogParser {
         const referenceTime = referenceTest && referenceTest.duration;
         if (!__WEBPACK_IMPORTED_MODULE_0_lodash__["isEmpty"](referenceTime)) {
             tests.forEach(t => {
-                t.referencedDuration = __WEBPACK_IMPORTED_MODULE_1__definitions_common__["b" /* Time */].fromMilliSeconds((+t.duration) / (+referenceTime));
+                t.referencedDuration = __WEBPACK_IMPORTED_MODULE_1__definitions_common__["b" /* Time */].fromMilliSeconds(t.duration.toMilliseconds() / referenceTime.toMilliseconds());
             });
         }
         tests.forEach(t => {
