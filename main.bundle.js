@@ -38,7 +38,7 @@ module.exports = module.exports.toString();
 /***/ "../../../../../src/app/app.component.html":
 /***/ (function(module, exports) {
 
-module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<div class=\"charts\" style=\"margin-left: 50px; margin-right: 50px; height: 500px;\">\n  <canvas id=\"performanceChart\" class=\"performance-chart\"></canvas>\n</div>\n\n<h3>Last builds</h3>\n<span *ngIf=\"!branchLastResult || branchLastResult.length === 0\">\n  Loading builds\n</span>\n<table *ngIf=\"branchLastResult && branchLastResult.length > 0\">\n  <thead>\n    <th>Branch</th>\n    <th>Time</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of branchLastResult\">\n      <td>{{build.branch}}</td>\n      <td>{{build.time}}</td>\n    </tr>\n  </tbody>\n</table>\n\n<h3>Builds</h3>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n          {{build.number}}\n      </td>\n      <td>\n         {{build.finished_at}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <span *ngIf=\"!build.jobs || build.jobs.length === 0\">\n          Loading jobs and logs\n        </span>\n        <ul *ngIf=\"build.jobs && build.jobs.length > 0\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.parsed\">\n                  Run: {{job.parsed.testsNum}}. Failures: {{job.parsed.failures}}. Total time: {{job.parsed.time}}.\n                  <table *ngIf=\"job.parsed.tests && job.parsed.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>Referenced duration</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.parsed.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.referencedDuration}}</td>\n                        <td>{{t.collect0}}</td>\n                        <td>{{t.collect1}}</td>\n                        <td>{{t.collect2}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
+module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.name || 'Unknown'}}</span>\n<span class=\"pull-right\" *ngIf=\"!user\">Authorizing</span>\n\n<!-- <a href=\"https://api.travis-ci.com/auth/handshake\">log in</a> -->\n\n<div class=\"charts\" style=\"margin-left: 50px; margin-right: 50px; height: 500px;\">\n  <canvas id=\"performanceChart\" class=\"performance-chart\"></canvas>\n</div>\n\n<h3>Last builds</h3>\n<span *ngIf=\"!branchLastResult || branchLastResult.length === 0\">\n  Loading builds\n</span>\n<table *ngIf=\"branchLastResult && branchLastResult.length > 0\">\n  <thead>\n    <th>Branch</th>\n    <th>Time</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of branchLastResult\">\n      <td>{{build.branch}}</td>\n      <td>{{build.time}}</td>\n    </tr>\n  </tbody>\n</table>\n\n<h3>Builds</h3>\n<table *ngIf=\"builds && builds.length > 0\">\n  <thead>\n    <th>Number</th>\n    <th>Finished</th>\n    <th>State</th>\n    <th>Message</th>\n    <th>Misc</th>\n  </thead>\n  <tbody>\n    <tr *ngFor=\"let build of builds\">\n      <td>\n         {{build.number}}\n      </td>\n      <td>\n         {{build.finished}}\n      </td>\n      <td>\n          {{build.state}}\n      </td>\n      <td>\n          {{build.commit.message}}\n      </td>\n      <td>\n        <span *ngIf=\"!build.jobs || build.jobs.length === 0\">\n          Loading jobs and logs\n        </span>\n        <ul *ngIf=\"build.jobs && build.jobs.length > 0\">\n          <ng-container *ngFor=\"let job of build.jobs\">\n              <li *ngIf=\"job.info\">\n                  Run: {{job.info.testsCount}}. Failures: {{job.info.failuresCount}}. Total time: {{job.info.time}}.\n                  <table *ngIf=\"job.info.tests && job.info.tests.length > 0\">\n                    <thead>\n                      <th>Name</th>\n                      <th>Duration (ms)</th>\n                      <th>Referenced duration</th>\n                      <th>GC0</th>\n                      <th>GC1</th>\n                      <th>GC2</th>\n                      <th>Allocated (KB)</th>\n                    </thead>\n                    <tbody>\n                      <tr *ngFor=\"let t of job.info.tests\">\n                        <td>{{t.shortName}}</td>\n                        <td>{{t.duration}}</td>\n                        <td>{{t.referencedDuration}}</td>\n                        <td>{{t.gc0count}}</td>\n                        <td>{{t.gc1count}}</td>\n                        <td>{{t.gc2count}}</td>\n                        <td>{{t.allocated}}</td>\n                      </tr>\n                    </tbody>\n                  </table>\n                </li>\n          </ng-container>          \n        </ul>\n      </td>\n    </tr>\n  </tbody>\n</table>"
 
 /***/ }),
 
@@ -47,14 +47,18 @@ module.exports = "<span class=\"pull-right\" *ngIf=\"user\">Logged as {{user.nam
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppComponent; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_common_http__ = __webpack_require__("../../../common/@angular/common/http.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_operators_map__ = __webpack_require__("../../../../rxjs/operators/map.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_rxjs_operators_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_rxjs_operators_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_chart_js__ = __webpack_require__("../../../../chart.js/src/chart.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_chart_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_chart_js__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_lodash__ = __webpack_require__("../../../../lodash/lodash.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_lodash___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_lodash__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__services_travis_api_service__ = __webpack_require__("../../../../../src/app/services/travis-api.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__angular_common_http__ = __webpack_require__("../../../common/@angular/common/http.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_operators_map__ = __webpack_require__("../../../../rxjs/operators/map.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_rxjs_operators_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_rxjs_operators_map__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_chart_js__ = __webpack_require__("../../../../chart.js/src/chart.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_chart_js___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_chart_js__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash__ = __webpack_require__("../../../../lodash/lodash.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_lodash__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__definitions_travis_definitions__ = __webpack_require__("../../../../../src/app/definitions/travis-definitions.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__definitions_common__ = __webpack_require__("../../../../../src/app/definitions/common.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__utils_common__ = __webpack_require__("../../../../../src/app/utils/common.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -69,123 +73,38 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 
 
 
+
+
+
+
 let AppComponent = class AppComponent {
-    constructor(httpClient) {
+    constructor(httpClient, travisApi) {
         this.httpClient = httpClient;
-        this.randomColorGenerator = (opacity = 0.5) => {
-            const r = Math.random() * 256;
-            const g = Math.random() * 256;
-            const b = Math.random() * 256;
-            return 'rgba(' + [r.toFixed(), g.toFixed(), b.toFixed(), opacity].join(',') + ')';
-        };
-        this.auth();
-        this.getBuilds().then(() => {
-            this.prepareChart();
+        this.travisApi = travisApi;
+        this.travisApi.auth().then((user) => {
+            this.user = __WEBPACK_IMPORTED_MODULE_6__definitions_travis_definitions__["a" /* TravisDefinitions */].toCommonUser(user);
         });
-        this.getBuilds().then(() => {
-            this.prepareLastBuilds();
+        this.travisApi.getBuilds().then((builds) => {
+            this.builds = builds.map(build => __WEBPACK_IMPORTED_MODULE_6__definitions_travis_definitions__["a" /* TravisDefinitions */].toCommonBuild(build));
+            this.prepareChart(this.builds);
+            this.branchLastResult = this.prepareLastBuilds(this.builds);
         });
     }
-    auth() {
-        const headers = this.getHeaders();
-        return this.httpClient.get('https://api.travis-ci.org/users', {
-            headers: headers
-        })
-            .toPromise()
-            .then((res) => {
-            this.user = res.user;
-            return res.user;
-        });
-    }
-    getBuilds() {
-        const headers = this.getHeaders();
-        const params = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["d" /* HttpParams */]();
-        return this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
-            headers: headers
-        })
-            .toPromise()
-            .then((res) => {
-            this.builds = res.builds;
-            this.builds.forEach(build => {
-                build.commit = res.commits.find(c => c.id === build.commit_id);
-            });
-            return Promise.all(this.builds.map(build => {
-                build.jobs = [];
-                return Promise.all(build.job_ids.map((jobId) => {
-                    return this.httpClient.get('https://api.travis-ci.org/jobs/' + jobId, {
-                        headers: headers
-                    })
-                        .toPromise()
-                        .then((r) => {
-                        build.jobs.push(r.job);
-                        return this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
-                            .toPromise()
-                            .then((log) => {
-                            r.job.log = log;
-                            r.job.parsed = this.parseLog(log);
-                        });
-                    });
-                }));
-            }));
-        });
-    }
-    parseLog(log) {
-        const lines = log.split(/[\r\n]/);
-        const executionRuntimeRegexp = /Execution Runtime: /;
-        const fullTestInfoRegexp = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
-        const testInfoRegexp = /\*\*\*\*\* Test (.+)\. Took (\d*\.?\d*) ms. GC collects: (-?\d+) (-?\d+) (-?\d+) Allocated: (\d*\.?\d*) KB\./;
-        const startTestLineIdx = lines.findIndex(l => executionRuntimeRegexp.test(l));
-        const endTestLineIdx = lines.findIndex(l => fullTestInfoRegexp.test(l));
-        const tests = lines
-            .slice(startTestLineIdx, endTestLineIdx)
-            .filter(l => testInfoRegexp.test(l))
-            .map(l => l.match(testInfoRegexp))
-            .map(([str, name, duration, gc0, gc1, gc2, allocated]) => ({
-            shortName: name.slice(name.lastIndexOf('.') + 1),
-            fullName: name,
-            duration: duration,
-            referencedDuration: null,
-            collect0: gc0,
-            collect1: gc1,
-            collect2: gc2,
-            allocated: allocated
-        }));
-        const [fullString, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(fullTestInfoRegexp);
-        const referenceTest = tests.find(t => t.shortName === 'reference test');
-        const referenceTime = referenceTest && referenceTest.duration;
-        if (!__WEBPACK_IMPORTED_MODULE_4_lodash__["isEmpty"](referenceTime)) {
-            tests.forEach(t => {
-                t.referencedDuration = this.prettify((+t.duration) / (+referenceTime));
-            });
-        }
-        tests.forEach(t => {
-            t.duration = this.prettify(t.duration);
-        });
-        return {
-            testsNum: testsNum,
-            errors: errors,
-            failures: failures,
-            inconclusive: inconclusive,
-            time: this.prettify(+time * 100),
-            referenceTime: this.prettify(referenceTime),
-            tests: tests
-        };
-    }
-    prepareChart() {
-        const dt = __WEBPACK_IMPORTED_MODULE_4_lodash__["flatMap"](this.builds, b => b.jobs.filter(j => !__WEBPACK_IMPORTED_MODULE_4_lodash__["isNil"](j.parsed)).map(j => {
+    prepareChart(builds) {
+        const dt = __WEBPACK_IMPORTED_MODULE_5_lodash__["flatMap"](builds, b => b.jobs.filter(j => !__WEBPACK_IMPORTED_MODULE_5_lodash__["isNil"](j.info)).map(j => {
             return {
                 label: b.commit.branch + '(' + b.number + ')',
                 message: b.commit.message,
-                time: j.parsed.time,
-                referenceTime: j.parsed.referenceTime
+                time: j.info.time.toMilliseconds(),
+                referenceTime: j.info.referenceTime && j.info.referenceTime.toMilliseconds()
             };
         }))
-            .filter(job => !__WEBPACK_IMPORTED_MODULE_4_lodash__["isEmpty"](job.referenceTime));
+            .filter(job => !__WEBPACK_IMPORTED_MODULE_5_lodash__["isNil"](job.referenceTime));
         const labels = dt.map(j => j.label);
-        const data = dt.map(j => (+j.time) / (+j.referenceTime));
-        const colors = dt.map(j => this.randomColorGenerator());
+        const data = dt.map(j => j.time / j.referenceTime);
+        const colors = dt.map(j => Object(__WEBPACK_IMPORTED_MODULE_8__utils_common__["b" /* randomColorGenerator */])());
         const ctx = document.getElementById('performanceChart').getContext('2d');
-        const chart = new __WEBPACK_IMPORTED_MODULE_3_chart_js__["Chart"](ctx, {
+        const chart = new __WEBPACK_IMPORTED_MODULE_4_chart_js__["Chart"](ctx, {
             type: 'bar',
             data: {
                 labels: labels,
@@ -208,51 +127,30 @@ let AppComponent = class AppComponent {
             }
         });
     }
-    prepareLastBuilds() {
-        const allBuilds = __WEBPACK_IMPORTED_MODULE_4_lodash__["flatMap"](this.builds, b => b.jobs.filter(j => !__WEBPACK_IMPORTED_MODULE_4_lodash__["isNil"](j.parsed)).map(j => {
+    prepareLastBuilds(builds) {
+        const allBuilds = __WEBPACK_IMPORTED_MODULE_5_lodash__["flatMap"](builds, b => b.jobs.filter(j => !__WEBPACK_IMPORTED_MODULE_5_lodash__["isNil"](j.info)).map(j => {
             return {
                 id: b.number,
                 branch: b.commit.branch,
-                fullTime: j.parsed.time,
-                referenceTime: j.parsed.referenceTime,
-                time: j.parsed.referenceTime && this.prettify((+j.parsed.referenceTime) / (+j.parsed.time))
+                fullTime: j.info.time,
+                referenceTime: j.info.referenceTime,
+                time: j.info.referenceTime && __WEBPACK_IMPORTED_MODULE_7__definitions_common__["b" /* Time */].fromMilliSeconds(j.info.referenceTime.toMilliseconds() / j.info.time.toMilliseconds())
             };
         }));
-        const lastBuilds = __WEBPACK_IMPORTED_MODULE_4_lodash__["map"](__WEBPACK_IMPORTED_MODULE_4_lodash__["groupBy"](allBuilds, b => b.branch), bs => __WEBPACK_IMPORTED_MODULE_4_lodash__["maxBy"](bs, b => b.id));
-        this.branchLastResult = lastBuilds;
-    }
-    prettify(val, digitsAfterDot = 2) {
-        if (__WEBPACK_IMPORTED_MODULE_4_lodash__["isNil"](val)) {
-            return val;
-        }
-        else if (__WEBPACK_IMPORTED_MODULE_4_lodash__["isNumber"](val)) {
-            return val.toFixed(digitsAfterDot);
-        }
-        else {
-            const dotIndex = val.indexOf('.');
-            return dotIndex === -1
-                ? val
-                : val.slice(0, dotIndex + 3);
-        }
-    }
-    getHeaders() {
-        const headers = new __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["c" /* HttpHeaders */]({
-            'Accept': 'application/vnd.travis-ci.2+json',
-            'Authorization': 'token "uJeDK6yjk6Gt9HtfRNec-w"'
-        });
-        return headers;
+        const lastBuilds = __WEBPACK_IMPORTED_MODULE_5_lodash__["map"](__WEBPACK_IMPORTED_MODULE_5_lodash__["groupBy"](allBuilds, b => b.branch), bs => __WEBPACK_IMPORTED_MODULE_5_lodash__["maxBy"](bs, b => b.id));
+        return lastBuilds;
     }
 };
 AppComponent = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_0__angular_core__["n" /* Component */])({
+    Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["n" /* Component */])({
         selector: 'app-root',
         template: __webpack_require__("../../../../../src/app/app.component.html"),
         styles: [__webpack_require__("../../../../../src/app/app.component.css")]
     }),
-    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["a" /* HttpClient */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_1__angular_common_http__["a" /* HttpClient */]) === "function" && _a || Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_2__angular_common_http__["a" /* HttpClient */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_2__angular_common_http__["a" /* HttpClient */]) === "function" && _a || Object, typeof (_b = typeof __WEBPACK_IMPORTED_MODULE_0__services_travis_api_service__["a" /* TravisApiService */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_0__services_travis_api_service__["a" /* TravisApiService */]) === "function" && _b || Object])
 ], AppComponent);
 
-var _a;
+var _a, _b;
 //# sourceMappingURL=app.component.js.map
 
 /***/ }),
@@ -262,10 +160,12 @@ var _a;
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppModule; });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__ = __webpack_require__("../../../platform-browser/@angular/platform-browser.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__angular_common_http__ = __webpack_require__("../../../common/@angular/common/http.es5.js");
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__app_component__ = __webpack_require__("../../../../../src/app/app.component.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__services_app_veyor_api_service__ = __webpack_require__("../../../../../src/app/services/app-veyor-api.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_travis_api_service__ = __webpack_require__("../../../../../src/app/services/travis-api.service.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__ = __webpack_require__("../../../platform-browser/@angular/platform-browser.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__angular_common_http__ = __webpack_require__("../../../common/@angular/common/http.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__app_component__ = __webpack_require__("../../../../../src/app/app.component.ts");
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -276,23 +176,343 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 
 
 
+
+
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
-    Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["L" /* NgModule */])({
+    Object(__WEBPACK_IMPORTED_MODULE_3__angular_core__["L" /* NgModule */])({
         declarations: [
-            __WEBPACK_IMPORTED_MODULE_3__app_component__["a" /* AppComponent */]
+            __WEBPACK_IMPORTED_MODULE_5__app_component__["a" /* AppComponent */]
         ],
         imports: [
-            __WEBPACK_IMPORTED_MODULE_0__angular_platform_browser__["a" /* BrowserModule */],
-            __WEBPACK_IMPORTED_MODULE_2__angular_common_http__["b" /* HttpClientModule */]
+            __WEBPACK_IMPORTED_MODULE_2__angular_platform_browser__["a" /* BrowserModule */],
+            __WEBPACK_IMPORTED_MODULE_4__angular_common_http__["b" /* HttpClientModule */]
         ],
-        providers: [],
-        bootstrap: [__WEBPACK_IMPORTED_MODULE_3__app_component__["a" /* AppComponent */]]
+        providers: [__WEBPACK_IMPORTED_MODULE_1__services_travis_api_service__["a" /* TravisApiService */], __WEBPACK_IMPORTED_MODULE_0__services_app_veyor_api_service__["a" /* AppVeyorApiService */]],
+        bootstrap: [__WEBPACK_IMPORTED_MODULE_5__app_component__["a" /* AppComponent */]]
     })
 ], AppModule);
 
 //# sourceMappingURL=app.module.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/definitions/common.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__utils_common__ = __webpack_require__("../../../../../src/app/utils/common.ts");
+
+class Time {
+    constructor(amount, measurement) {
+        this.amount = amount;
+        this.measurement = measurement;
+    }
+    static fromSeconds(seconds) {
+        return new Time(seconds, 's');
+    }
+    static fromMilliSeconds(ms) {
+        return new Time(ms, 'ms');
+    }
+    static fromDate(date) {
+        return Time.fromMilliSeconds(date.getMilliseconds());
+    }
+    static fromDateString(date) {
+        return Time.fromDate(new Date(date));
+    }
+    toMilliseconds() {
+        return this.measurement === 'ms'
+            ? this.amount
+            : this.amount * 100;
+    }
+    toString() {
+        return `${Object(__WEBPACK_IMPORTED_MODULE_0__utils_common__["a" /* prettify */])(this.amount)} ${this.measurement}`;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["b"] = Time;
+
+class MemoryAmount {
+    constructor(amount, type) {
+        this.amount = amount;
+        this.type = type;
+    }
+    toString() {
+        return `${Object(__WEBPACK_IMPORTED_MODULE_0__utils_common__["a" /* prettify */])(this.amount)} ${this.type}`;
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = MemoryAmount;
+
+//# sourceMappingURL=common.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/definitions/travis-definitions.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TravisDefinitions; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__common__ = __webpack_require__("../../../../../src/app/definitions/common.ts");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__utils_log_parser__ = __webpack_require__("../../../../../src/app/utils/log-parser.ts");
+
+
+
+var TravisDefinitions;
+(function (TravisDefinitions) {
+    function toCommonUser(user) {
+        return {
+            name: user.name,
+            login: user.login,
+            email: user.email,
+            avatar_url: user.avatar_url
+        };
+    }
+    TravisDefinitions.toCommonUser = toCommonUser;
+    function toCommonBuild(build) {
+        return {
+            number: +build.number,
+            commit: toCommonCommit(build.commit),
+            duration: __WEBPACK_IMPORTED_MODULE_0__common__["b" /* Time */].fromMilliSeconds(build.duration),
+            finished: new Date(build.finished_at),
+            jobs: build.jobs.map(job => toCommonJob(job)),
+            started: new Date(build.started_at),
+            state: build.state
+        };
+    }
+    TravisDefinitions.toCommonBuild = toCommonBuild;
+    function toCommonCommit(commit) {
+        return {
+            branch: commit.branch,
+            committed: new Date(commit.committed_at),
+            committer_email: commit.committer_email,
+            committer_name: commit.committer_name,
+            message: commit.message
+        };
+    }
+    TravisDefinitions.toCommonCommit = toCommonCommit;
+    function toCommonJob(job) {
+        return {
+            finished: new Date(job.finished_at),
+            started: new Date(job.started_at),
+            state: job.state,
+            info: __WEBPACK_IMPORTED_MODULE_1__utils_log_parser__["a" /* LogParser */].parseLog(job.log)
+        };
+    }
+    TravisDefinitions.toCommonJob = toCommonJob;
+})(TravisDefinitions || (TravisDefinitions = {}));
+//# sourceMappingURL=travis-definitions.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/services/app-veyor-api.service.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return AppVeyorApiService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_common_http__ = __webpack_require__("../../../common/@angular/common/http.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+let AppVeyorApiService = class AppVeyorApiService {
+    constructor() { }
+    getAppVeyorHeaders() {
+        const headers = new __WEBPACK_IMPORTED_MODULE_0__angular_common_http__["c" /* HttpHeaders */]({
+            'Authorization': 'Bearer 7t97fs85nh82dj3fd71a'
+        });
+        return headers;
+    }
+};
+AppVeyorApiService = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["B" /* Injectable */])(),
+    __metadata("design:paramtypes", [])
+], AppVeyorApiService);
+
+//# sourceMappingURL=app-veyor-api.service.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/services/travis-api.service.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return TravisApiService; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__angular_common_http__ = __webpack_require__("../../../common/@angular/common/http.es5.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__angular_core__ = __webpack_require__("../../../core/@angular/core.es5.js");
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+
+
+let TravisApiService = class TravisApiService {
+    constructor(httpClient) {
+        this.httpClient = httpClient;
+    }
+    auth() {
+        const headers = this.getJenkinsHeaders();
+        return this.httpClient.get('https://api.travis-ci.org/users', {
+            headers: headers
+        })
+            .toPromise()
+            .then((res) => {
+            return res.user;
+        });
+    }
+    getBuilds() {
+        const headers = this.getJenkinsHeaders();
+        const params = new __WEBPACK_IMPORTED_MODULE_0__angular_common_http__["d" /* HttpParams */]();
+        return this.httpClient.get('https://api.travis-ci.org/repos/SayToMe/Solve/builds', {
+            headers: headers
+        })
+            .toPromise()
+            .then((res) => {
+            const builds = res.builds;
+            builds.forEach(build => {
+                build.commit = res.commits.find(c => c.id === build.commit_id);
+            });
+            return Promise.all(builds.map(build => {
+                return Promise.all(build.job_ids.map((jobId) => {
+                    return this.httpClient.get('https://api.travis-ci.org/jobs/' + jobId, {
+                        headers: headers
+                    })
+                        .toPromise()
+                        .then((r) => {
+                        return this.httpClient.get('https://api.travis-ci.org/jobs/' + r.job.id + '/log', { responseType: 'text' })
+                            .toPromise()
+                            .then((log) => {
+                            r.job.log = log;
+                            return r.job;
+                        });
+                    });
+                })).then((jobs) => {
+                    build.jobs = jobs;
+                    return build;
+                });
+            }));
+        });
+    }
+    getJenkinsHeaders() {
+        const headers = new __WEBPACK_IMPORTED_MODULE_0__angular_common_http__["c" /* HttpHeaders */]({
+            'Accept': 'application/vnd.travis-ci.2+json',
+            'Authorization': 'token "uJeDK6yjk6Gt9HtfRNec-w"'
+        });
+        return headers;
+    }
+};
+TravisApiService = __decorate([
+    Object(__WEBPACK_IMPORTED_MODULE_1__angular_core__["B" /* Injectable */])(),
+    __metadata("design:paramtypes", [typeof (_a = typeof __WEBPACK_IMPORTED_MODULE_0__angular_common_http__["a" /* HttpClient */] !== "undefined" && __WEBPACK_IMPORTED_MODULE_0__angular_common_http__["a" /* HttpClient */]) === "function" && _a || Object])
+], TravisApiService);
+
+var _a;
+//# sourceMappingURL=travis-api.service.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/utils/common.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["b"] = randomColorGenerator;
+/* harmony export (immutable) */ __webpack_exports__["a"] = prettify;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash__ = __webpack_require__("../../../../lodash/lodash.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_lodash__);
+
+function randomColorGenerator(opacity = 0.5) {
+    const r = Math.random() * 256;
+    const g = Math.random() * 256;
+    const b = Math.random() * 256;
+    return 'rgba(' + [r.toFixed(), g.toFixed(), b.toFixed(), opacity].join(',') + ')';
+}
+function prettify(val, digitsAfterDot = 2) {
+    if (__WEBPACK_IMPORTED_MODULE_0_lodash__["isNil"](val)) {
+        return val;
+    }
+    else if (__WEBPACK_IMPORTED_MODULE_0_lodash__["isNumber"](val)) {
+        return val.toFixed(digitsAfterDot);
+    }
+    else {
+        const dotIndex = val.indexOf('.');
+        return dotIndex === -1
+            ? val
+            : val.slice(0, dotIndex + 3);
+    }
+}
+//# sourceMappingURL=common.js.map
+
+/***/ }),
+
+/***/ "../../../../../src/app/utils/log-parser.ts":
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash__ = __webpack_require__("../../../../lodash/lodash.js");
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_lodash__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__definitions_common__ = __webpack_require__("../../../../../src/app/definitions/common.ts");
+
+
+class LogParser {
+    constructor() { }
+    static parseLog(log) {
+        const lines = log.split(/[\r\n]/);
+        const executionRuntimeRegexp = /Execution Runtime: /;
+        const fullTestInfoRegexp = /Tests run: (\d+), Errors: (\d+), Failures: (\d+), Inconclusive: (\d+), Time: (.+?) seconds/;
+        const testInfoRegexp = /\*{5} Test (.+)\. Took (\d*\.?\d*) ms. GC collects: (-?\d+) (-?\d+) (-?\d+) Allocated: (\d*\.?\d*) KB\./;
+        const startTestLineIdx = lines.findIndex(l => executionRuntimeRegexp.test(l));
+        const endTestLineIdx = lines.findIndex(l => fullTestInfoRegexp.test(l));
+        const tests = lines
+            .slice(startTestLineIdx, endTestLineIdx)
+            .filter(l => testInfoRegexp.test(l))
+            .map(l => l.match(testInfoRegexp))
+            .map(([str, name, duration, gc0, gc1, gc2, allocated]) => ({
+            shortName: name.slice(name.lastIndexOf('.') + 1),
+            fullName: name,
+            duration: __WEBPACK_IMPORTED_MODULE_1__definitions_common__["b" /* Time */].fromMilliSeconds(+duration),
+            referencedDuration: null,
+            gc0count: +gc0,
+            gc1count: +gc1,
+            gc2count: +gc2,
+            allocated: new __WEBPACK_IMPORTED_MODULE_1__definitions_common__["a" /* MemoryAmount */](+allocated, 'KB')
+        }));
+        const [fullString, testsNum, errors, failures, inconclusive, time] = lines[endTestLineIdx].match(fullTestInfoRegexp);
+        const referenceTest = tests.find(t => t.shortName === 'reference test');
+        const referenceTime = referenceTest && referenceTest.duration;
+        if (!__WEBPACK_IMPORTED_MODULE_0_lodash__["isEmpty"](referenceTime)) {
+            tests.forEach(t => {
+                t.referencedDuration = __WEBPACK_IMPORTED_MODULE_1__definitions_common__["b" /* Time */].fromMilliSeconds((+t.duration) / (+referenceTime));
+            });
+        }
+        tests.forEach(t => {
+            t.duration = t.duration;
+        });
+        return {
+            testsCount: +testsNum,
+            errorsCount: +errors,
+            failuresCount: +failures,
+            inconclusiveCount: +inconclusive,
+            tests: tests,
+            time: __WEBPACK_IMPORTED_MODULE_1__definitions_common__["b" /* Time */].fromMilliSeconds(+time * 100),
+            referenceTime: referenceTime
+        };
+    }
+}
+/* harmony export (immutable) */ __webpack_exports__["a"] = LogParser;
+
+//# sourceMappingURL=log-parser.js.map
 
 /***/ }),
 
